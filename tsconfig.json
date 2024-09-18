@@ -1,11 +1,8 @@
 {
   "compilerOptions": {
-    "esModuleInterop": true,
-    "module": "esnext",
     "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
     "jsx": "react",
-    "skipLibCheck": true,
-    "moduleResolution": "node",
     "lib": [
       "dom",
       "es5",
@@ -14,10 +11,16 @@
       "es2015.promise",
       "es2016.array.include",
       "es2018",
-      "es2020"
+      "es2020",
+      "esnext"
     ],
-    "resolveJsonModule": true,
+    "module": "esnext",
+    "moduleResolution": "node",
     "noEmit": true,
-    "target": "esnext"
-  }
+    "noImplicitAny": false,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "target": "es2015"
+  },
+  "types": ["@testing-library/jest-dom", "lodash"],
 }
