@@ -12,7 +12,7 @@ interface FormBuilderPaginationProps {
   onPageNumberChange?: ({ page }: { page: number }) => void;
 }
 
-export const FormBuilderPagination: React.FC<FormBuilderPaginationProps> = ({
+export const ContentPackagesBuilderPagination: React.FC<FormBuilderPaginationProps> = ({
   totalItems,
   pageSize,
   onPageNumberChange,

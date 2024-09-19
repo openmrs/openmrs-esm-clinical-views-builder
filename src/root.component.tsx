@@ -10,7 +10,7 @@ const RootComponent: React.FC = () => {
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/new" element={<ClinicalViewsEditor />} />
-        <Route path="/edit/:formUuid" element={<ClinicalViewsEditor />} />
+        <Route path="/edit/:contentPackage" element={<ClinicalViewsEditor />} />
       </Routes>
     </BrowserRouter>
   );

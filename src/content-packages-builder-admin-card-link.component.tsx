@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Layer, ClickableTile } from '@carbon/react';
 import { ArrowRight } from '@carbon/react/icons';
 
-const FormBuilderCardLink: React.FC = () => {
+const ContentPackagesBuilderCardLink: React.FC = () => {
   const { t } = useTranslation();
   const header = t('manageClinicalViews', 'Manage clinical views');
   return (
@@ -21,4 +21,4 @@ const FormBuilderCardLink: React.FC = () => {
   );
 };
 
-export default FormBuilderCardLink;
+export default ContentPackagesBuilderCardLink;

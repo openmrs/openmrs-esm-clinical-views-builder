@@ -1,8 +1,8 @@
 {
   "name": "@openmrs/esm-clinical-views-builder",
-  "version": "2.7.0",
+  "version": "1.0.0",
   "license": "MPL-2.0",
-  "description": "Form Builder for O3",
+  "description": "Clinical Views Builder for O3",
   "browser": "dist/openmrs-esm-clinical-views-builder.js",
   "main": "src/index.ts",
   "source": true,
@@ -19,8 +19,7 @@
     "verify": "turbo run lint typescript coverage --color",
     "coverage": "yarn test --coverage --passWithNoTests",
     "postinstall": "husky install",
-    "extract-translations": "i18next 'src/**/*.component.tsx' 'src/**/*.modal.tsx' --config ./i18next-parser.config.js",
-    "ci:bump-form-engine-lib": "yarn up @openmrs/esm-form-engine-lib@next"
+    "extract-translations": "i18next 'src/**/*.component.tsx' 'src/**/*.modal.tsx' --config ./i18next-parser.config.js"
   },
   "files": [
     "dist",
@@ -32,7 +31,7 @@
   "keywords": [
     "openmrs",
     "microfrontends",
-    "form builder"
+    "clinical views builder"
   ],
   "repository": {
     "type": "git",
@@ -56,7 +55,7 @@
     "sass": "^1.67.0"
   },
   "peerDependencies": {
-    "@openmrs/esm-framework": "next",
+    "@openmrs/esm-framework": "*",
     "react": "18.x",
     "react-dom": "18.x",
     "react-i18next": "11.x",
@@ -67,8 +66,7 @@
     "@dnd-kit/modifiers": "^6.0.1",
     "@dnd-kit/sortable": "^7.0.2",
     "@dnd-kit/utilities": "^3.2.2",
-    "@openmrs/esm-framework": "^5.8.2-pre.2318",
-    "@openmrs/esm-patient-common-lib": "next",
+    "@openmrs/esm-framework": "next",
     "@openmrs/esm-styleguide": "next",
     "@playwright/test": "1.45.3",
     "@swc/cli": "^0.1.65",
@@ -98,7 +96,7 @@
     "jest-cli": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
     "lint-staged": "^14.0.1",
-    "openmrs": "^5.8.2-pre.2318",
+    "openmrs": "next",
     "prettier": "^3.2.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -115,5 +113,5 @@
     "*.{ts,tsx}": "eslint --cache --fix --max-warnings 0",
     "*.{css,scss,ts,tsx}": "prettier --write --list-different"
   },
-  "packageManager": "yarn@4.4.0"
+  "packageManager": "yarn@4.3.1"
 }

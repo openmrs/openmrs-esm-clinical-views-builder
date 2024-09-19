@@ -4,7 +4,7 @@ import { configSchema } from './config-schema';
 const moduleName = '@openmrs/esm-clinical-views-builder';
 
 const options = {
-  featureName: 'form-builder',
+  featureName: 'content-packages-builder',
   moduleName,
 };
 

@@ -27,7 +27,7 @@ const ContentPackagesEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
           [styles.maximized]: isMaximized,
         })}
       >
-        <Column lg={8} md={8} className={styles.column}>
+        <Column lg={responsiveSize} md={responsiveSize} className={styles.column}>
           <div className={styles.heading}>
             <span className={styles.tabHeading}>{t('schemaEditor', 'Schema editor')}</span>
           </div>
