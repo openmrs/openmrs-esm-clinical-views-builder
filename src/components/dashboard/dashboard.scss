@@ -1,0 +1,144 @@
+@use '@carbon/colors';
+@use '@carbon/layout';
+@use "@carbon/type";
+
+.container {
+  padding: 1rem;
+  background-color: colors.$gray-10;
+}
+
+.backgroundDataFetchingIndicator {
+  flex: 1;
+}
+
+.flexContainer {
+  display: flex;
+  justify-content: space-between;
+}
+
+.toolbarWrapper {
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+}
+
+:global(.omrs-breakpoint-lt-desktop) {
+  .toolbarWrapper {
+    height: layout.$spacing-09;
+  }
+}
+
+:global(.omrs-breakpoint-gt-tablet) {
+  .toolbarWrapper {
+    height: layout.$spacing-07;
+  }
+}
+
+.tableToolbar {
+  width: 20%;
+  min-width: 12.5rem;
+}
+
+.headerContainer {
+  background-color: colors.$gray-10;
+}
+
+.searchbox {
+  input {
+    outline: 2px solid colors.$orange-40 !important;
+  }
+}
+
+.link {
+  text-decoration: none;
+}
+
+.table {
+  tr {
+    &:last-of-type {
+      td {
+        border-bottom: none;
+      }
+    }
+  }
+
+  td {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+}
+
+.toolbar {
+  position: relative;
+  display: flex;
+  width: 100%;
+  min-height: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.emptyContainer {
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 1rem;
+}
+
+.tableContainer {
+  padding: 0;
+
+  :global(.cds--data-table-content) {
+    border: 1px solid colors.$gray-20;
+    border-bottom: none;
+    overflow: visible;
+  }
+
+  :global(.cds--table-toolbar) {
+    position: relative;
+    height: 2rem;
+    min-height: 0rem;
+    overflow: visible;
+    top: 0;
+  }
+
+  &:global(.cds--data-table-container) {
+    padding-top: 0rem;
+  }
+
+}
+
+.content {
+  @include type.type-style('heading-compact-02');
+  color: colors.$gray-70;
+  margin-bottom: 0.5rem;
+}
+
+.tileContainer {
+  background-color: colors.$white-0;
+  border-top: 1px solid colors.$gray-70;
+  padding: 5rem 0;
+}
+
+.tile {
+  margin: auto;
+  width: fit-content;
+}
+
+.tileContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.warningMessage {
+  margin: 1rem 0;
+}
+
+.spinner {
+  &:global(.cds--inline-loading) {
+    min-height: 1rem;
+  }
+
+  :global(.cds--inline-loading__text) {
+    font-size: unset;
+  }
+}
