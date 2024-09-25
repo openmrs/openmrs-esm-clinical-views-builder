@@ -106,27 +106,19 @@
 
 }
 
+.tableHeading {
+  display: flex;
+  align-items: center;
+  @include type.type-style('heading-compact-02');
+  min-height: 2.5rem;
+  width: 100%;
+  padding: 1rem 0;
+  margin: 2rem 0;
+}
 .content {
   @include type.type-style('heading-compact-02');
   color: colors.$gray-70;
   margin-bottom: 0.5rem;
-}
-
-.tileContainer {
-  background-color: colors.$white-0;
-  border-top: 1px solid colors.$gray-70;
-  padding: 5rem 0;
-}
-
-.tile {
-  margin: auto;
-  width: fit-content;
-}
-
-.tileContent {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
 }
 
 .warningMessage {

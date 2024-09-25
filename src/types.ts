@@ -69,3 +69,36 @@ interface DashboardConfig {
   path: string;
   slot: string;
 }
+
+export interface ExtensionSlot {
+  add?: string[];
+  configure?: {
+    [key: string]: {
+      title: string;
+      slotName: string;
+      isExpanded?: boolean;
+    };
+  };
+}
+
+export interface DynamicExtensionSlot {
+  add?: string[];
+  configure?: {
+    [key: string]: {
+      title: string;
+      slot: string;
+      path: string;
+    };
+  };
+}
+
+export interface Schema {
+  $schema?: string;
+  id?: string;
+  '@openmrs/esm-patient-chart-app': {
+    extensionSlots: {
+      'patient-chart-dashboard-slot': ExtensionSlot;
+      [key: string]: DynamicExtensionSlot | ExtensionSlot;
+    };
+  };
+}
