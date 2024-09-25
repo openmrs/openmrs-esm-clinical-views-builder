@@ -29,7 +29,8 @@ const InteractiveBuilder = ({ schema, onSchemaChange }: InteractiveBuilderProps)
     };
 
     if (!schema) {
-      onSchemaChange({ ...dummySchema });
+      onSchemaChange(dummySchema);
+      return dummySchema;
     }
 
     return schema || dummySchema;

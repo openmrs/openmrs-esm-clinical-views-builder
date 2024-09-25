@@ -51,7 +51,7 @@ const ContentPackagesEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
 
   const updateSchema = useCallback((updatedSchema: Schema) => {
     setSchema(updatedSchema);
-    const stringfiedJson: string = JSON.stringify(updatedSchema);
+    const stringfiedJson: string = JSON.stringify(updatedSchema, null, 2);
     setStringifiedSchema(stringfiedJson);
   }, []);
 
@@ -144,7 +144,7 @@ const ContentPackagesEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
         ].title;
       }
     }
-    return 'default_schema_name';
+    return '';
   };
 
   const handleSavePackage = () => {
@@ -181,7 +181,7 @@ const ContentPackagesEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
   };
 
   const navGroupTitle = getNavGroupTitle(schema);
-  const sanitizedTitle = navGroupTitle.replace(/\s+/g, '_');
+  const sanitizedTitle = navGroupTitle?.replace(/\s+/g, '_');
 
   const responsiveSize = isMaximized ? 16 : 8;
   const defaultEnterDelayInMs = 300;
@@ -263,7 +263,9 @@ const ContentPackagesEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
             <span className={styles.tabHeading}>{t('interactiveBuilder', 'Interactive Builder')}</span>
             <div className={styles.topBtns}>
               <Button disabled={!navGroupTitle || isSaving} onClick={handleSavePackage}>
-                {schema && schema.id ? t('updateSchema', 'Update Schema') : t('saveClinicalView', 'Save clinical view')}
+                {schema && clinicalViewId
+                  ? t('updateSchema', 'Update Schema')
+                  : t('saveClinicalView', 'Save clinical view')}
               </Button>
             </div>
           </div>

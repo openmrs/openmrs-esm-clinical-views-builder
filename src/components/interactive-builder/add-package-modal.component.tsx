@@ -83,7 +83,7 @@ const PackageModal: React.FC<PackageModalProps> = ({ closeModal, schema, onSchem
           },
         };
 
-        onSchemaChange(updatedSchema);
+        onSchemaChange(JSON.parse(JSON.stringify(updatedSchema, null, 2)));
 
         setTitle('');
         setSlotName('');
