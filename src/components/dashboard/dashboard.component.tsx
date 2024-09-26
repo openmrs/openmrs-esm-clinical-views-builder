@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { useTranslation, type TFunction } from 'react-i18next';
 import {
   Button,
@@ -18,31 +18,33 @@ import {
   Tile,
 } from '@carbon/react';
 import { Add, Download, Edit, TrashCan } from '@carbon/react/icons';
-import { type KeyedMutator } from 'swr';
 import { ContentPackagesBuilderPagination } from '../pagination';
 
 import Header from '../header/header.component';
 import styles from './dashboard.scss';
 import { mockContentPackages } from '../../../__mocks__/content-packages.mock';
-import { navigate, useLayoutType, usePagination } from '@openmrs/esm-framework';
-
-type Mutator = KeyedMutator<{
-  data: {
-    results: Array<any>;
-  };
-}>;
+import { navigate, useLayoutType, usePagination, ConfigurableLink, showModal } from '@openmrs/esm-framework';
+import { getAllPackagesFromLocalStorage, deletePackageFromLocalStorage } from '../../utils';
 
 interface ActionButtonsProps {
-  clinicalViews: any;
-  mutate: Mutator;
   responsiveSize: string;
+  clinicalViewKey: string;
   t: TFunction;
+  onEdit: (key: string) => void;
+  onDelete: (key: string) => void;
+  onDownload: (key: string) => void;
 }
 
-function ActionButtons({ clinicalViews, mutate, responsiveSize, t }: ActionButtonsProps) {
+function ActionButtons({ responsiveSize, clinicalViewKey, t, onDelete, onDownload, onEdit }: ActionButtonsProps) {
   const defaultEnterDelayInMs = 300;
 
-  const launchDeleteClinicalViewsPackageModal = {};
+  const launchDeleteClinicalViewsPackageModal = () => {
+    const dispose = showModal('delete-clinicalView-modal', {
+      closeModal: () => dispose(),
+      clinicalViewKey,
+      onDelete,
+    });
+  };
 
   const EditButton = () => {
     return (
@@ -50,11 +52,7 @@ function ActionButtons({ clinicalViews, mutate, responsiveSize, t }: ActionButto
         enterDelayMs={defaultEnterDelayInMs}
         kind="ghost"
         label={t('editSchema', 'Edit schema')}
-        onClick={() =>
-          navigate({
-            to: `${window.spaBase}/clinical-views-builder/edit/${clinicalViews}`,
-          })
-        }
+        onClick={onEdit}
         size={responsiveSize}
       >
         <Edit />
@@ -64,11 +62,12 @@ function ActionButtons({ clinicalViews, mutate, responsiveSize, t }: ActionButto
 
   const DownloadSchemaButton = () => {
     return (
-      <a download={`${clinicalViews}.json`} href="#">
+      <a download={`${clinicalViewKey}.json`} href="#">
         <IconButton
           enterDelayMs={defaultEnterDelayInMs}
           kind="ghost"
           label={t('downloadSchema', 'Download schema')}
+          onClick={onDownload}
           size={responsiveSize}
         >
           <Download />
@@ -100,16 +99,42 @@ function ActionButtons({ clinicalViews, mutate, responsiveSize, t }: ActionButto
   );
 }
 
-function ContentPackagesList({ contentPackages, isValidating, mutate, t }: any) {
+function ContentPackagesList({ isValidating, t }: any) {
   const pageSize = 10;
   const isTablet = useLayoutType() === 'tablet';
   const responsiveSize = isTablet ? 'lg' : 'sm';
   const [searchString, setSearchString] = useState('');
+  const [clinicalViews, setClinicalViews] = useState<any[]>([]);
+
+  useEffect(() => {
+    const packages = getAllPackagesFromLocalStorage();
+    setClinicalViews(Object.entries(packages).map(([key, value]) => ({ key, ...(value as object) })));
+  }, []);
+
+  const filteredViews = useMemo(() => {
+    const searchTerm = searchString.trim().toLowerCase();
+    return clinicalViews.filter((pkg) => pkg.key.toLowerCase().includes(searchTerm));
+  }, [clinicalViews, searchString]);
+
+  const handleEdit = (packageKey: string) => {
+    navigate({
+      to: `${window.spaBase}/clinical-views-builder/edit/${packageKey}`,
+    });
+  };
+
+  const handleDelete = (packageKey: string) => {
+    deletePackageFromLocalStorage(packageKey);
+    setClinicalViews(clinicalViews.filter((pkg) => pkg.key !== packageKey));
+  };
 
   const tableHeaders = [
     {
-      header: t('packageName', 'Package name'),
-      key: 'key',
+      header: t('name', 'Name'),
+      key: 'name',
+    },
+    {
+      header: t('dashboards', 'Dashboards'),
+      key: 'dashboards',
     },
     {
       header: t('schemaActions', 'Schema actions'),
@@ -117,31 +142,85 @@ function ContentPackagesList({ contentPackages, isValidating, mutate, t }: any) 
     },
   ];
 
-  const searchResults = useMemo(() => {
-    const searchTerm = searchString?.trim().toLowerCase();
+  const { paginated, goTo, results, currentPage } = usePagination(filteredViews, pageSize);
 
-    if (searchTerm) {
-      return mockContentPackages.filter((contentPackage) =>
-        Object.keys(contentPackage).some((key) => key.toLowerCase().includes(searchTerm)),
-      );
+  const handleDownload = (key) => {
+    const schema = localStorage.getItem(`packageJSON_${key}`);
+    if (schema) {
+      const blob = new Blob([schema], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${key}.json`;
+      a.click();
+    } else {
+      console.error('No schema found to download.');
+    }
+  };
+
+  const getNavGroupTitle = (schema) => {
+    const packageSlotKey = 'patient-chart-dashboard-slot';
+    const packageConfig = schema?.['@openmrs/esm-patient-chart-app']?.extensionSlots[packageSlotKey];
+
+    if (packageConfig) {
+      const navGroupKey = packageConfig?.add[0];
+      const navGroupConfig = packageConfig?.configure[navGroupKey];
+      return navGroupConfig?.title || 'Unnamed Clinical View';
     }
 
-    return mockContentPackages;
-  }, [searchString]);
+    return 'default_schema_name';
+  };
 
-  const { paginated, goTo, results, currentPage } = usePagination(searchResults, pageSize);
+  const getDashboardTitles = (schema) => {
+    const packageSlotKey = 'patient-chart-dashboard-slot';
 
-  const tableRows = Array.from(results, (result) => {
-    return Object.keys(result).map((key) => {
-      const contentPackage = result[key];
-      return {
-        ...contentPackage,
-        id: key,
-        key: key,
-        actions: <ActionButtons clinicalViews={contentPackage} mutate={mutate} responsiveSize={responsiveSize} t={t} />,
-      };
-    });
-  }).flat();
+    const packageConfig = schema?.['@openmrs/esm-patient-chart-app']?.extensionSlots?.[packageSlotKey];
+
+    const navGroupKey = packageConfig?.add?.[0];
+    const navGroupConfig = packageConfig?.configure?.[navGroupKey];
+
+    const submenuSlotKey = navGroupConfig?.slotName;
+    const submenuConfig = schema?.['@openmrs/esm-patient-chart-app']?.extensionSlots?.[submenuSlotKey];
+
+    if (submenuConfig && submenuConfig.add) {
+      const dashboardTitles = submenuConfig.add.map((dashboardKey) => {
+        return submenuConfig.configure?.[dashboardKey]?.title || 'Unnamed Dashboard';
+      });
+
+      return dashboardTitles.length ? dashboardTitles.join(', ') : 'No dashboards available';
+    }
+
+    return 'No dashboards available';
+  };
+
+  const tableRows = results.map((contentPackage) => {
+    const clinicalViewName = getNavGroupTitle(contentPackage);
+    const dashboardTitles = getDashboardTitles(contentPackage);
+
+    return {
+      id: contentPackage.key,
+      name: (
+        <ConfigurableLink
+          className={styles.link}
+          to={`${window.spaBase}/clinical-views-builder/edit/${contentPackage.id}`}
+          templateParams={{ clinicalViewUuid: contentPackage.id }}
+        >
+          {clinicalViewName}
+        </ConfigurableLink>
+      ),
+      dashboards: dashboardTitles,
+      actions: (
+        <ActionButtons
+          responsiveSize={responsiveSize}
+          clinicalViewKey={contentPackage.key}
+          t={t}
+          onEdit={() => handleEdit(contentPackage.key)}
+          onDelete={() => handleDelete(contentPackage.key)}
+          onDownload={() => handleDownload(contentPackage.key)}
+        />
+      ),
+    };
+  });
 
   const handleSearch = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -158,6 +237,7 @@ function ContentPackagesList({ contentPackages, isValidating, mutate, t }: any) 
           <span>{isValidating ? <InlineLoading /> : null}</span>
         </div>
       </div>
+      <div className={styles.tableHeading}>{t('clinicalViewsTableHeader', 'Clinical Views List')}</div>
       <DataTable rows={tableRows} headers={tableHeaders} size={isTablet ? 'lg' : 'sm'} useZebraStyles>
         {({ rows, headers, getTableProps, getHeaderProps, getRowProps }) => (
           <>
@@ -182,7 +262,7 @@ function ContentPackagesList({ contentPackages, isValidating, mutate, t }: any) 
                         })
                       }
                     >
-                      {t('createNewClinicalview', 'Create a new clinical view')}
+                      {t('createNewClinicalView', 'Create a new clinical view')}
                     </Button>
                   </TableToolbarContent>
                 </TableToolbar>
@@ -224,7 +304,7 @@ function ContentPackagesList({ contentPackages, isValidating, mutate, t }: any) 
       {paginated && (
         <ContentPackagesBuilderPagination
           currentItems={results.length}
-          totalItems={searchResults.length}
+          totalItems={filteredViews.length}
           onPageNumberChange={({ page }) => {
             goTo(page);
           }}

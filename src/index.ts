@@ -12,11 +12,20 @@ export const importTranslation = require.context('../translations', true, /.json
 
 export const root = getAsyncLifecycle(() => import('./root.component'), options);
 
+export function startupApp() {
+  defineConfigSchema(moduleName, configSchema);
+}
+
 export const systemAdministrationClinicalViewsBuilderCardLink = getAsyncLifecycle(
   () => import('./content-packages-builder-admin-card-link.component'),
   options,
 );
+export const newPackageModal = getAsyncLifecycle(
+  () => import('./components/interactive-builder/add-package-modal.component'),
+  options,
+);
 
-export function startupApp() {
-  defineConfigSchema(moduleName, configSchema);
-}
+export const newMenuModal = getAsyncLifecycle(
+  () => import('./components/interactive-builder/add-submenu-modal.component'),
+  options,
+);

@@ -21,5 +21,15 @@
       "online": true,
       "offline": true
     }
+  ],
+  "modals": [
+    {
+      "name": "new-package-modal",
+      "component": "newPackageModal"
+    },
+    {
+      "name": "new-menu-modal",
+      "component": "newMenuModal"
+    }
   ]
 }
