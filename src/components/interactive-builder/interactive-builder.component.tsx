@@ -1,9 +1,8 @@
-import React, { useCallback } from 'react';
-import { showModal } from '@openmrs/esm-framework';
+import React, { useCallback, useState } from 'react';
+import { showModal, useLayoutType, AddIcon, EditIcon } from '@openmrs/esm-framework';
 import { useTranslation } from 'react-i18next';
 import { v4 as uuidv4 } from 'uuid';
-import { Button, Accordion, AccordionItem } from '@carbon/react';
-import { Add } from '@carbon/react/icons';
+import { Button, Accordion, AccordionItem, Tile } from '@carbon/react';
 import { type DynamicExtensionSlot, type Schema } from '../../types';
 import styles from './interactive-builder.scss';
 
@@ -52,6 +51,31 @@ const InteractiveBuilder = ({ schema, onSchemaChange }: InteractiveBuilderProps)
       onSchemaChange,
     });
   }, [schema, onSchemaChange]);
+
+  const handleConfigureDashboardModal = useCallback(
+    (slotName) => {
+      const dispose = showModal('configure-dashboard-modal', {
+        closeModal: () => dispose(),
+        schema,
+        onSchemaChange,
+        slotName,
+      });
+    },
+    [schema, onSchemaChange],
+  );
+
+  const handleConfigureColumnsModal = useCallback(
+    (slotDetails, tabDefinition) => {
+      const dispose = showModal('configure-columns-modal', {
+        closeModal: () => dispose(),
+        schema,
+        onSchemaChange,
+        slotDetails,
+        tabDefinition,
+      });
+    },
+    [schema, onSchemaChange],
+  );
 
   const getNavGroupTitle = (schema) => {
     if (schema) {
@@ -108,17 +132,63 @@ const InteractiveBuilder = ({ schema, onSchemaChange }: InteractiveBuilderProps)
           {submenuConfig ? (
             submenuConfig.add.map((submenuKey) => {
               const submenuDetails = submenuConfig.configure[submenuKey];
+              const subMenuSlot = submenuDetails?.slot;
+              const getSubMenuSlotDetails = (schema, subMenuSlot) => {
+                const patientChartApp = schema['@openmrs/esm-patient-chart-app'];
+                if (patientChartApp && patientChartApp.extensionSlots) {
+                  return patientChartApp.extensionSlots[subMenuSlot];
+                }
+                return null;
+              };
+              const subMenuSlotDetails = getSubMenuSlotDetails(schema, subMenuSlot);
               return (
                 <Accordion key={submenuKey}>
                   <AccordionItem title={submenuDetails?.title}>
-                    <p>Menu Slot: {submenuDetails?.slot}</p>
+                    <p>
+                      {t('menuSlot', 'Menu Slot')} : {submenuDetails?.slot}
+                    </p>
                     <p style={{ opacity: 0.5 }}>
                       {t(
                         'helperTextForAddDasboards',
                         'Now configure dashboards to show on the patient chart when this submenu is clicked.',
                       )}
                     </p>
-                    <Button kind="ghost" renderIcon={Add}>
+                    {subMenuSlotDetails?.configure[submenuDetails?.slot]?.tabDefinitions.map((tabDefinition) => (
+                      <Tile className={styles.tile}>
+                        <div className={styles.editStatusIcon}>
+                          <Button
+                            size="md"
+                            kind={'tertiary'}
+                            hasIconOnly
+                            renderIcon={(props) => <EditIcon size={16} {...props} />}
+                            iconDescription={t('editTabDefinition', 'Edit tab definition')}
+                            // onClick={() => setChartView(true)}
+                          />
+                        </div>
+                        <p>
+                          {t('tabName', 'Tab name')} : {tabDefinition?.tabName}
+                        </p>
+                        <p>
+                          {t('headerTitle', 'Header title')} : {tabDefinition?.headerTitle}
+                        </p>
+                        <Button
+                          kind="ghost"
+                          renderIcon={AddIcon}
+                          onClick={() => {
+                            handleConfigureColumnsModal(submenuDetails, tabDefinition);
+                          }}
+                        >
+                          {t('configureColumns', 'Configure columns')}
+                        </Button>
+                      </Tile>
+                    ))}
+                    <Button
+                      kind="ghost"
+                      renderIcon={AddIcon}
+                      onClick={() => {
+                        handleConfigureDashboardModal(submenuDetails?.slot);
+                      }}
+                    >
                       {t('configureDashboard', 'Configure dashboard')}
                     </Button>
                   </AccordionItem>
@@ -133,7 +203,7 @@ const InteractiveBuilder = ({ schema, onSchemaChange }: InteractiveBuilderProps)
           <Button
             className={styles.addDashboardButton}
             kind="ghost"
-            renderIcon={Add}
+            renderIcon={AddIcon}
             onClick={launchAddClinicalViewMenuModal}
             iconDescription={t('addSubmenu', 'Add Submenu')}
             disabled={!navGroupTitle}

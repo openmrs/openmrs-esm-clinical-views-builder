@@ -81,12 +81,12 @@ const ContentPackagesEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
             configure: {
               'dashboard#menuOne': {
                 title: 'First Menu',
-                slotName: 'first-menu-slot',
+                slot: 'first-menu-slot',
                 path: 'first-menu-path',
               },
               'dashboard#menuTwo': {
                 title: 'Second Menu',
-                slotName: 'second-menu-slot',
+                slot: 'second-menu-slot',
                 path: 'second-menu-path',
               },
             },
