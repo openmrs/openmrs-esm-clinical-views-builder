@@ -30,6 +30,14 @@
     {
       "name": "new-menu-modal",
       "component": "newMenuModal"
+    },
+    {
+      "name": "configure-dashboard-modal",
+      "component": "configureDashboardModal"
+    },
+    {
+      "name": "configure-columns-modal",
+      "component": "configureColumnModal"
     }
   ]
 }

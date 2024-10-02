@@ -1,4 +1,5 @@
 @use '@carbon/layout';
+@use "@carbon/type";
 
 .modalHeader {
   :global {
@@ -26,4 +27,12 @@
       transform: translate(-3.75rem, 1.25rem);
     }
   }
+}
+
+.label {
+  margin-top: layout.$spacing-05;
+}
+
+.p {
+  @include type.type-style('body-compact-01');
 }

@@ -29,3 +29,13 @@ export const newMenuModal = getAsyncLifecycle(
   () => import('./components/interactive-builder/add-submenu-modal.component'),
   options,
 );
+
+export const configureDashboardModal = getAsyncLifecycle(
+  () => import('./components/interactive-builder/configure-dashboard-modal.component'),
+  options,
+);
+
+export const configureColumnModal = getAsyncLifecycle(
+  () => import('./components/interactive-builder/add-columns-modal.component'),
+  options,
+);
