@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Button, Accordion, AccordionItem, Tile } from '@carbon/react';
 import { type DynamicExtensionSlot, type Schema } from '../../types';
 import styles from './interactive-builder.scss';
+import { getSubMenuSlotDetails } from '../../helpers';
 
 interface InteractiveBuilderProps {
   schema: Schema;
@@ -133,13 +134,6 @@ const InteractiveBuilder = ({ schema, onSchemaChange }: InteractiveBuilderProps)
             submenuConfig.add.map((submenuKey) => {
               const submenuDetails = submenuConfig.configure[submenuKey];
               const subMenuSlot = submenuDetails?.slot;
-              const getSubMenuSlotDetails = (schema, subMenuSlot) => {
-                const patientChartApp = schema['@openmrs/esm-patient-chart-app'];
-                if (patientChartApp && patientChartApp.extensionSlots) {
-                  return patientChartApp.extensionSlots[subMenuSlot];
-                }
-                return null;
-              };
               const subMenuSlotDetails = getSubMenuSlotDetails(schema, subMenuSlot);
               return (
                 <Accordion key={submenuKey}>

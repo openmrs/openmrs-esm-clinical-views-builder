@@ -5,3 +5,11 @@ export const generateNodeId = (string) =>
       return index === 0 ? word.toLowerCase() : word.toUpperCase();
     })
     .replace(/\s+/g, '');
+
+export const getSubMenuSlotDetails = (schema, subMenuSlot) => {
+  const patientChartApp = schema['@openmrs/esm-patient-chart-app'];
+  if (patientChartApp && patientChartApp.extensionSlots) {
+    return patientChartApp.extensionSlots[subMenuSlot];
+  }
+  return null;
+};
