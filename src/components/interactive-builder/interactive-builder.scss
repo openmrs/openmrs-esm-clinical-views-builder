@@ -1,6 +1,7 @@
 @use '@carbon/colors';
 @use '@carbon/type';
 @use '@carbon/layout';
+@use '@openmrs/esm-styleguide/src/vars' as *;
 
 .interactiveBuilderContainer {
   margin: 1rem;
@@ -121,6 +122,18 @@
   justify-content: right;
 }
 
-.tile {
-  margin: layout.$spacing-02 0 layout.$spacing-02;
+.tileContainer {
+  margin: layout.$spacing-03 0 layout.$spacing-03;
+  width:fit-content
 }
+
+.tileContent {
+  display: flex;
+  flex-direction: column;
+}
+
+.content {
+  color: $text-02;
+  margin-bottom: layout.$spacing-03;
+}
+

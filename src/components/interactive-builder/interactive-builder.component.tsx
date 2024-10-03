@@ -1,9 +1,9 @@
-import React, { useCallback, useState } from 'react';
-import { showModal, useLayoutType, AddIcon, EditIcon } from '@openmrs/esm-framework';
+import React, { useCallback } from 'react';
+import { showModal, AddIcon, EditIcon } from '@openmrs/esm-framework';
 import { useTranslation } from 'react-i18next';
 import { v4 as uuidv4 } from 'uuid';
 import { Button, Accordion, AccordionItem, Tile } from '@carbon/react';
-import { type DynamicExtensionSlot, type Schema } from '../../types';
+import { DefinitionTypes, type DynamicExtensionSlot, type Schema } from '../../types';
 import styles from './interactive-builder.scss';
 import { getSubMenuSlotDetails } from '../../helpers';
 
@@ -66,13 +66,14 @@ const InteractiveBuilder = ({ schema, onSchemaChange }: InteractiveBuilderProps)
   );
 
   const handleConfigureColumnsModal = useCallback(
-    (slotDetails, tabDefinition) => {
+    (slotDetails, tabDefinition, definitionType) => {
       const dispose = showModal('configure-columns-modal', {
         closeModal: () => dispose(),
         schema,
         onSchemaChange,
         slotDetails,
         tabDefinition,
+        definitionType,
       });
     },
     [schema, onSchemaChange],
@@ -147,8 +148,9 @@ const InteractiveBuilder = ({ schema, onSchemaChange }: InteractiveBuilderProps)
                         'Now configure dashboards to show on the patient chart when this submenu is clicked.',
                       )}
                     </p>
-                    {subMenuSlotDetails?.configure[submenuDetails?.slot]?.tabDefinitions.map((tabDefinition) => (
-                      <Tile className={styles.tile}>
+
+                    {subMenuSlotDetails?.configure?.[submenuDetails?.slot]?.tabDefinitions?.map((tabDefinition) => (
+                      <Tile className={styles.tileContainer}>
                         <div className={styles.editStatusIcon}>
                           <Button
                             size="md"
@@ -156,20 +158,82 @@ const InteractiveBuilder = ({ schema, onSchemaChange }: InteractiveBuilderProps)
                             hasIconOnly
                             renderIcon={(props) => <EditIcon size={16} {...props} />}
                             iconDescription={t('editTabDefinition', 'Edit tab definition')}
-                            // onClick={() => setChartView(true)}
                           />
                         </div>
-                        <p>
-                          {t('tabName', 'Tab name')} : {tabDefinition?.tabName}
-                        </p>
-                        <p>
-                          {t('headerTitle', 'Header title')} : {tabDefinition?.headerTitle}
-                        </p>
+                        <p className={styles.subheading}>{t('tabName', 'Tab name')}</p>
+                        <p>{tabDefinition?.tabName}</p>
+                        <p className={styles.subheading}>{t('headerTitle', 'Header title')}</p>
+                        <p>{tabDefinition?.headerTitle}</p>
+                        <p className={styles.subheading}>{t('columns', 'Columns')}</p>
+                        {tabDefinition?.columns.map((column) => (
+                          <div className={styles.tileContent}>
+                            <p className={styles.content}>
+                              {t('title', 'Title')} : {column.title}
+                            </p>
+                            <p className={styles.content}>
+                              {t('concept', 'Concept')} : {column.concept}
+                            </p>
+                            <p className={styles.content}>
+                              {column.isDate && (
+                                <>
+                                  {t('date', 'Date')} : {column.isDate}
+                                </>
+                              )}{' '}
+                            </p>
+                            <p className={styles.content}>
+                              {column.isLink && (
+                                <>
+                                  {t('link', 'Link')} : {column.isLink}
+                                </>
+                              )}{' '}
+                            </p>
+                          </div>
+                        ))}
                         <Button
                           kind="ghost"
                           renderIcon={AddIcon}
                           onClick={() => {
-                            handleConfigureColumnsModal(submenuDetails, tabDefinition);
+                            handleConfigureColumnsModal(submenuDetails, tabDefinition, DefinitionTypes.TAB_DEFINITION);
+                          }}
+                        >
+                          {t('configureColumns', 'Configure columns')}
+                        </Button>
+                      </Tile>
+                    ))}
+
+                    {subMenuSlotDetails?.configure[submenuDetails?.slot]?.tilesDefinitions?.map((tileDefinition) => (
+                      <Tile className={styles.tileContainer}>
+                        <div className={styles.editStatusIcon}>
+                          <Button
+                            size="md"
+                            kind={'tertiary'}
+                            hasIconOnly
+                            renderIcon={(props) => <EditIcon size={16} {...props} />}
+                            iconDescription={t('editTileDefinition', 'Edit tile definition')}
+                          />
+                        </div>
+                        <p className={styles.subheading}>{t('headerTitle', 'Header title')}</p>
+                        <p>{tileDefinition?.tilesHeader}</p>
+                        <p className={styles.subheading}>{t('columns', 'Columns')} </p>
+                        {tileDefinition?.columns.map((column) => (
+                          <div className={styles.tileContent}>
+                            <p className={styles.content}>
+                              {t('title', 'Title')} : {column.title}
+                            </p>
+                            <p className={styles.content}>
+                              {t('concept', 'Concept')} : {column.concept}
+                            </p>
+                          </div>
+                        ))}
+                        <Button
+                          kind="ghost"
+                          renderIcon={AddIcon}
+                          onClick={() => {
+                            handleConfigureColumnsModal(
+                              submenuDetails,
+                              tileDefinition,
+                              DefinitionTypes.TILE_DEFINITION,
+                            );
                           }}
                         >
                           {t('configureColumns', 'Configure columns')}
