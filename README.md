@@ -1,46 +1,109 @@
 ![Node.js CI](https://github.com/openmrs/openmrs-openmrs-esm-clinical-views-builder/workflows/Node.js%20CI/badge.svg)
 
-# OpenMRS ESM Template App
+# OpenMRS ESM Clinical Views Builder
 
-This repository provides a starting point for creating your own
-[OpenMRS Microfrontend](https://wiki.openmrs.org/display/projects/OpenMRS+3.0%3A+A+Frontend+Framework+that+enables+collaboration+and+better+User+Experience).
+The Clinical Views Builder is a widget used to create OpenMRS clinical views schemas. It enables users to both create new schemas and edit existing ones. It provides an embedded code editor that accepts JSON code. It also provides an interactive editor where users can construct a schema interactively without writing code.
 
 For more information, please see the
 [OpenMRS Frontend Developer Documentation](https://o3-docs.openmrs.org/#/).
 
-In particular, the [Setup](https://o3-docs.openmrs.org/docs/frontend-modules/setup) section can help you get started developing microfrontends in general. The [Creating a microfrontend](https://o3-docs.openmrs.org/docs/recipes/create-a-frontend-module) section provides information about how to use this repository to create your own microfrontend.
+## Local development
 
-## Running this code
+Check out the developer documentation [here](http://o3-dev.docs.openmrs.org).
 
-```sh
-yarn  # to install dependencies
-yarn start  # to run the dev server
+This monorepo uses [yarn](https://yarnpkg.com).
+
+To install the dependencies, run:
+
+```bash
+yarn
 ```
 
-Once it is running, a browser window
-should open with the OpenMRS 3 application. Log in and then navigate to `/openmrs/spa/root`.
+To start a dev server, run:
 
-## Adapting the code
+```bash
+yarn start'
+```
 
-1. Start by finding and replacing all instances of "template" with the name
-  of your microfrontend.
-2. Update `index.ts` as appropriate, at least changing the feature name and the page name and route.
-3. Rename the `root.*` family of files to have the name of your first page.
-4. Delete the contents of the objects in `config-schema`. Start filling them back in once you have a clear idea what will need to be configured.
-5. Delete the `greeter` and `patient-getter` directories, and the contents of `root.component.tsx`.
-6. Delete the contents of `translations/en.json`.
-7. Open up `.github/workflows` and adapt it to your needs. If you're writing
- a microfrontend that will be managed by the community, you might be able to
-  just replace all instances of `template` with your microfrontend's name.
-  However, if you're writing a microfrontend for a specific organization or
-  implementation, you will probably need to configure GitHub Actions differently.
-8. Delete the contents of this README and write a short explanation of what
-  you intend to build. Links to planning or design documents can be very helpful.
+Once the dev server launches, log in and select a location. You will get redirected to the home page. Once there, you can either:
 
-At this point, you should be able to write your first page as a React application.
+* Click the App Switcher icon in the top right corner and then click the `System Administration` link to go the Admin page. Click on the `Clinical Views Builder` tile to launch the app.
+* Manually navigate to the `/openmrs/spa/clinical-views-builder` URL.
 
-Check out the [Medication dispensing app](https://github.com/openmrs/openmrs-esm-dispensing-app) for an example of a non-trivial app built using the Template.
+## Running tests
 
-## Integrating it into your application
+To run tests for all packages, run:
 
-Please see [Creating a Frontend Module](https://o3-docs.openmrs.org/docs/recipes/create-a-frontend-module).
+```bash
+yarn turbo run test
+```
+
+To run tests in `watch` mode, run:
+
+```bash
+yarn turbo run test:watch
+```
+To run a specific test file, run:
+
+```bash
+yarn turbo run test -- visit-notes-form
+```
+
+The above command will only run tests in the file or files that match the provided string.
+
+You can also run the matching tests from above in watch mode by running:
+
+```bash
+yarn turbo run test:watch -- visit-notes-form
+```
+
+To generate a `coverage` report, run:
+
+```bash
+yarn turbo run coverage
+```
+
+By default, `turbo` will cache test runs. This means that re-running tests wihout changing any of the related files will return the cached logs from the last run. To bypass the cache, run tests with the `force` flag, as follows:
+
+```bash
+yarn turbo run test --force
+```
+
+To run end-to-end tests, run:
+
+```bash
+yarn test-e2e
+```
+
+Read the [e2e testing guide](https://o3-docs.openmrs.org/docs/frontend-modules/end-to-end-testing) to learn more about End-to-End tests in this project.
+
+### Updating Playwright
+
+The Playwright version in the [Bamboo e2e Dockerfile](e2e/support/bamboo/playwright.Dockerfile#L2) and the `package.json` file must match. If you update the Playwright version in one place, you must update it in the other.
+
+## Troubleshooting
+
+If you notice that your local version of the application is not working or that there's a mismatch between what you see locally versus what's in [dev3](https://dev3.openmrs.org/openmrs/spa), you likely have outdated versions of core libraries. To update core libraries, run the following commands:
+
+```bash
+# Upgrade core libraries
+yarn up openmrs@next @openmrs/esm-framework@next
+
+# Reset version specifiers to `next`. Don't commit actual version numbers.
+git checkout package.json
+
+# Run `yarn` to recreate the lockfile
+yarn
+
+## Design Patterns
+
+For documentation about our design patterns, please visit our [design system](https://zeroheight.com/23a080e38/p/880723--introduction) documentation website.
+
+## Configuration
+
+Please see the [Implementer Documentation](https://wiki.openmrs.org/pages/viewpage.action?pageId=224527013) for information about configuring modules.
+
+## Deployment
+
+See [Creating a Distribution](http://o3-dev.docs.openmrs.org/#/main/distribution?id=creating-a-distribution) for information about adding microfrontends to a distribution.
+
