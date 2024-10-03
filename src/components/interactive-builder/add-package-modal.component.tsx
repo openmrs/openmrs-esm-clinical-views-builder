@@ -5,22 +5,13 @@ import { showSnackbar } from '@openmrs/esm-framework';
 import type { Schema } from '../../types';
 
 import styles from './modals.scss';
+import { isValidSlotName, toCamelCase } from '../../helpers';
 
 interface PackageModalProps {
   closeModal: () => void;
   schema: Schema;
   onSchemaChange: (schema: Schema) => void;
 }
-
-const toCamelCase = (str: string) => {
-  return str
-    .replace(/(?:^\w|[A-Z]|\b\w|\s+)/g, (match, index) => (index === 0 ? match.toLowerCase() : match.toUpperCase()))
-    .replace(/\s+/g, '');
-};
-
-const isValidSlotName = (slotName: string) => {
-  return /^[a-zA-Z0-9-]+$/.test(slotName);
-};
 
 const PackageModal: React.FC<PackageModalProps> = ({ closeModal, schema, onSchemaChange }) => {
   const { t } = useTranslation();
