@@ -22,11 +22,13 @@ import {
   type TabDefinition,
   type ExtensionSlot,
   type DashboardConfig,
+  DefinitionTypes,
 } from '../../types';
 import styles from './modals.scss';
 import { useForms } from '../../hooks/useForm';
 import { useFormConcepts } from '../../hooks/useFormConcepts';
 import { generateNodeId } from '../../helpers';
+import { useEncounterTypes } from '../../hooks/useEncounter';
 
 interface ConfigureDashboardModalProps {
   schema: Schema;
@@ -34,6 +36,7 @@ interface ConfigureDashboardModalProps {
   closeModal: () => void;
   slotDetails: DashboardConfig;
   tabDefinition: TabDefinition;
+  definitionType: DefinitionTypes;
 }
 
 const ConfigureDashboardModal: React.FC<ConfigureDashboardModalProps> = ({
@@ -42,6 +45,7 @@ const ConfigureDashboardModal: React.FC<ConfigureDashboardModalProps> = ({
   closeModal,
   slotDetails,
   tabDefinition,
+  definitionType,
 }) => {
   const { t } = useTranslation();
   const desktopLayout = isDesktop(useLayoutType());
@@ -49,9 +53,11 @@ const ConfigureDashboardModal: React.FC<ConfigureDashboardModalProps> = ({
   const [columnConcept, setColumnConcept] = useState('');
   const [isColumnDate, setIsColumnDate] = useState(false);
   const [isColumnLink, setIsColumnLink] = useState(false);
+  const [encounterType, setEncounterType] = useState('');
   const [selectedForm, setSelectedForm] = useState<FormType>();
   const { isLoadingForm, forms, formsError } = useForms();
   const { isLoadingFormConcepts, formConcepts, formConceptsError, mutate } = useFormConcepts(selectedForm);
+  const { isLoading, encounterTypes, encounterTypesError } = useEncounterTypes();
   const schemaBasePath = schema['@openmrs/esm-patient-chart-app'];
 
   const updateSchema = (newColumns) => {
@@ -68,20 +74,16 @@ const ConfigureDashboardModal: React.FC<ConfigureDashboardModalProps> = ({
                 ...schemaBasePath.extensionSlots[slotDetails?.slot]?.configure,
                 [slotDetails?.slot]: {
                   ...schemaBasePath.extensionSlots[slotDetails?.slot]?.configure[slotDetails?.slot],
-                  tabDefinitions: schemaBasePath.extensionSlots[slotDetails?.slot]?.configure[
-                    slotDetails?.slot
-                  ]?.tabDefinitions.map((tabDef) => {
-                    if (tabDef.tabName === tabDefinition.tabName) {
-                      // Match the tab definition you want to update
+                  [definitionType]: schemaBasePath.extensionSlots[slotDetails?.slot]?.configure[slotDetails?.slot]?.[
+                    definitionType
+                  ]?.map((def) => {
+                    if (def.tabName === tabDefinition.tabName) {
                       return {
-                        ...tabDef,
-                        columns: [
-                          ...(tabDef.columns || []), // Existing columns or empty array
-                          newColumns, // Add newColumns
-                        ],
+                        ...def,
+                        columns: [...(def.columns || []), newColumns],
                       };
                     }
-                    return tabDef; // Return unchanged tab definitions
+                    return def;
                   }),
                 },
               },
@@ -96,6 +98,7 @@ const ConfigureDashboardModal: React.FC<ConfigureDashboardModalProps> = ({
       setColumnConcept('');
       setIsColumnDate(false);
       setIsColumnLink(false);
+      setEncounterType('');
       showSnackbar({
         title: t('success', 'Success!'),
         kind: 'success',
@@ -114,15 +117,21 @@ const ConfigureDashboardModal: React.FC<ConfigureDashboardModalProps> = ({
   };
 
   const handleCreateColumn = () => {
-    const newColumns = {
+    const baseColumn = {
       id: generateNodeId(columnTitle),
       title: columnTitle,
       concept: columnConcept,
       isDate: isColumnDate,
-      isLink: isColumnLink,
     };
 
-    updateSchema(newColumns);
+    const newColumn = {
+      ...baseColumn,
+      ...(definitionType === DefinitionTypes.TAB_DEFINITION
+        ? { isLink: isColumnLink }
+        : { encounterType: encounterType, hasSummary: false, conceptMappings: [] }),
+    };
+
+    updateSchema(newColumn);
     closeModal();
   };
 
@@ -141,6 +150,28 @@ const ConfigureDashboardModal: React.FC<ConfigureDashboardModalProps> = ({
         <ModalBody>
           <Stack gap={5}>
             <FormGroup legendText={t('configureColumns', 'Configure columns')}>
+              <Select
+                labelText={t('selectEncounterType', 'Select an encounter type')}
+                id="encounterType"
+                invalidText="Required"
+                className={styles.label}
+                value={encounterType}
+                onChange={(event) => {
+                  setEncounterType(event.target.value);
+                }}
+              >
+                {!encounterType && <SelectItem text={t('selectEncounterType', 'Select an encounter type')} />}
+                {encounterTypes.length === 0 ||
+                  (encounterTypesError && (
+                    <SelectItem text={t('noEncounterTypesAvailable', 'No encounter types available')} />
+                  ))}
+                {encounterTypes?.length > 0 &&
+                  encounterTypes.map((encounterType) => (
+                    <SelectItem key={encounterType.uuid} text={encounterType.display} value={encounterType.display}>
+                      {encounterType.display}
+                    </SelectItem>
+                  ))}
+              </Select>
               <Dropdown
                 id="form"
                 initialSelectedItem={forms[0]}

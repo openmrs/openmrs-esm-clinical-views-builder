@@ -22,7 +22,7 @@ yarn
 To start a dev server, run:
 
 ```bash
-yarn start'
+yarn start
 ```
 
 Once the dev server launches, log in and select a location. You will get redirected to the home page. Once there, you can either:
@@ -88,12 +88,17 @@ If you notice that your local version of the application is not working or that 
 ```bash
 # Upgrade core libraries
 yarn up openmrs@next @openmrs/esm-framework@next
+```
 
 # Reset version specifiers to `next`. Don't commit actual version numbers.
+```bash
 git checkout package.json
+```
 
 # Run `yarn` to recreate the lockfile
+```bash
 yarn
+```
 
 ## Design Patterns
 

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Button,
@@ -12,10 +12,9 @@ import {
   Select,
   SelectItem,
 } from '@carbon/react';
-import { isDesktop, showSnackbar, useLayoutType } from '@openmrs/esm-framework';
+import { showSnackbar } from '@openmrs/esm-framework';
 import { type Schema, type Form as FormType, type ExtensionSlot } from '../../types';
 import styles from './modals.scss';
-import { useEncounterTypes } from '../../hooks/useEncounter';
 
 interface ConfigureDashboardModalProps {
   schema: Schema;
@@ -34,29 +33,22 @@ const ConfigureDashboardModal: React.FC<ConfigureDashboardModalProps> = ({
   const [selectedWidget, setSelectedWidget] = useState('');
   const [tabName, setTabName] = useState('');
   const [displayTitle, setDisplayTitle] = useState('');
-  const [encounterType, setEncounterType] = useState('');
-  const desktopLayout = isDesktop(useLayoutType());
-  const { isLoading, encounterTypes, encounterTypesError } = useEncounterTypes();
 
   const availableWidgets = [
     { uuid: 'encounter-list-table-tabs', value: 'Encounter list table' },
     { uuid: 'program-summary', value: 'Encounter tile' },
   ];
 
-  const newExtensionSlot = {
+  const newTableExtensionSlot = {
     [slotName]: {
       add: [slotName],
       configure: {
         [slotName]: {
-          title: tabName,
-          slotName: slotName,
-          isExpanded: true,
           tabDefinitions: [
             {
               tabName: tabName,
               headerTitle: tabName,
               displayText: displayTitle,
-              encounterType: encounterType,
               columns: [],
             },
           ],
@@ -64,8 +56,27 @@ const ConfigureDashboardModal: React.FC<ConfigureDashboardModalProps> = ({
       },
     } as ExtensionSlot,
   };
+
+  const newTileExtensionSlot = {
+    [slotName]: {
+      add: [slotName],
+      configure: {
+        [slotName]: {
+          tilesDefinitions: [
+            {
+              tilesHeader: displayTitle,
+              columns: [],
+            },
+          ],
+        },
+      },
+    } as ExtensionSlot,
+  };
+
   const updateSchema = () => {
     try {
+      const newExtensionSlot =
+        selectedWidget === 'encounter-list-table-tabs' ? newTableExtensionSlot : newTileExtensionSlot;
       const updatedSchema = {
         ...schema,
         '@openmrs/esm-patient-chart-app': {
@@ -128,7 +139,7 @@ const ConfigureDashboardModal: React.FC<ConfigureDashboardModalProps> = ({
                 {availableWidgets.length === 0 && <SelectItem text={t('noWidgetsAvailable', 'No widgets available')} />}
                 {availableWidgets?.length > 0 &&
                   availableWidgets.map((widget) => (
-                    <SelectItem key={widget.uuid} text={widget.value} value={widget.value}>
+                    <SelectItem key={widget.uuid} text={widget.value} value={widget.uuid}>
                       {widget.value}
                     </SelectItem>
                   ))}
@@ -136,7 +147,7 @@ const ConfigureDashboardModal: React.FC<ConfigureDashboardModalProps> = ({
             </FormGroup>
 
             {selectedWidget === 'encounter-list-table-tabs' && (
-              <FormGroup legendText={t('configureColumns', 'Configure columns')}>
+              <FormGroup legendText={t('encounterListConfiguration', 'Encounter list configuration')}>
                 <TextInput
                   required
                   id="tabName"
@@ -155,28 +166,20 @@ const ConfigureDashboardModal: React.FC<ConfigureDashboardModalProps> = ({
                   onChange={(event: React.ChangeEvent<HTMLInputElement>) => setDisplayTitle(event.target.value)}
                   className={styles.label}
                 />
-                <Select
-                  labelText={t('selectEncounterType', 'Select an encounter type')}
-                  id="encounterType"
-                  invalidText="Required"
+              </FormGroup>
+            )}
+
+            {selectedWidget === 'program-summary' && (
+              <FormGroup legendText={t('encounterTilesConfiguration', 'Encounter tiles configuration')}>
+                <TextInput
+                  required
+                  id="displayTitle"
+                  labelText={t('displayTitle', 'Display title')}
+                  placeholder={t('displayTitlePlaceholder', 'e.g. Clinical Visit Encounters')}
+                  value={displayTitle}
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) => setDisplayTitle(event.target.value)}
                   className={styles.label}
-                  value={encounterType}
-                  onChange={(event) => {
-                    setEncounterType(event.target.value);
-                  }}
-                >
-                  {!encounterType && <SelectItem text={t('selectEncounterType', 'Select an encounter type')} />}
-                  {encounterTypes.length === 0 ||
-                    (encounterTypesError && (
-                      <SelectItem text={t('noEncounterTypesAvailable', 'No encounter types available')} />
-                    ))}
-                  {encounterTypes?.length > 0 &&
-                    encounterTypes.map((encounterType) => (
-                      <SelectItem key={encounterType.uuid} text={encounterType.display} value={encounterType.display}>
-                        {encounterType.display}
-                      </SelectItem>
-                    ))}
-                </Select>
+                />
               </FormGroup>
             )}
           </Stack>

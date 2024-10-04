@@ -80,6 +80,7 @@ export interface ExtensionSlot {
       slotName: string;
       isExpanded?: boolean;
       tabDefinitions?: TabDefinition[];
+      tilesDefinitions?: TilesDefinition[];
     };
   };
 }
@@ -241,4 +242,14 @@ export interface OpenmrsFormResource extends OpenmrsResource {
 export interface ReferencedForm {
   formName: string;
   alias: string;
+}
+
+export interface TilesDefinition {
+  tilesHeader: string;
+  columns: Column[];
+}
+
+export enum DefinitionTypes {
+  TAB_DEFINITION = 'tabDefinitions',
+  TILE_DEFINITION = 'tilesDefinitions',
 }
