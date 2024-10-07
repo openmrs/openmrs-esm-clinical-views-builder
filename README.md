@@ -90,12 +90,12 @@ If you notice that your local version of the application is not working or that 
 yarn up openmrs@next @openmrs/esm-framework@next
 ```
 
-# Reset version specifiers to `next`. Don't commit actual version numbers.
+### Reset version specifiers to `next`. Don't commit actual version numbers.
 ```bash
 git checkout package.json
 ```
 
-# Run `yarn` to recreate the lockfile
+### Run `yarn` to recreate the lockfile
 ```bash
 yarn
 ```
