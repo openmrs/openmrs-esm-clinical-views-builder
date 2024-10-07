@@ -1,8 +1,8 @@
-import React, { useCallback } from 'react';
-import { showModal, AddIcon, EditIcon } from '@openmrs/esm-framework';
+import React, { useState, useCallback } from 'react';
+import { showModal, AddIcon, EditIcon, showSnackbar } from '@openmrs/esm-framework';
 import { useTranslation } from 'react-i18next';
 import { v4 as uuidv4 } from 'uuid';
-import { Button, Accordion, AccordionItem, Tile } from '@carbon/react';
+import { Button, Accordion, AccordionItem, Tile, TextInput } from '@carbon/react';
 import { DefinitionTypes, type DynamicExtensionSlot, type Schema } from '../../types';
 import styles from './interactive-builder.scss';
 import { getSubMenuSlotDetails } from '../../helpers';
@@ -14,6 +14,9 @@ interface InteractiveBuilderProps {
 
 const InteractiveBuilder = ({ schema, onSchemaChange }: InteractiveBuilderProps) => {
   const { t } = useTranslation();
+  const [editingTab, setEditingTab] = useState(null);
+  const [editedTabName, setEditedTabName] = useState('');
+  const [editedHeaderTitle, setEditedHeaderTitle] = useState('');
 
   const initializeSchema = useCallback(() => {
     const dummySchema: Schema = {
@@ -52,6 +55,43 @@ const InteractiveBuilder = ({ schema, onSchemaChange }: InteractiveBuilderProps)
       onSchemaChange,
     });
   }, [schema, onSchemaChange]);
+
+  const handleEditTab = (tabDefinition) => {
+    setEditingTab(tabDefinition);
+    setEditedTabName(tabDefinition.tabName);
+    setEditedHeaderTitle(tabDefinition.headerTitle);
+  };
+
+  const handleSaveTab = (submenuKey, tabIndex) => {
+    const updatedSchema = { ...schema };
+
+    const configureEntry =
+      updatedSchema['@openmrs/esm-patient-chart-app'].extensionSlots['patient-chart-dashboard-slot'].configure[
+        submenuKey
+      ];
+
+    if (configureEntry) {
+      if (!configureEntry.tabDefinitions) {
+        configureEntry.tabDefinitions = [];
+      }
+      configureEntry.tabDefinitions[tabIndex] = {
+        ...editingTab,
+        tabName: editedTabName,
+        headerTitle: editedHeaderTitle,
+      };
+      showSnackbar({
+        title: t('success', 'Success!'),
+        kind: 'success',
+        isLowContrast: true,
+        subtitle: t('tabEditedSuccessfully', 'Tab edited successfully!'),
+      });
+    } else {
+      console.error(`No configuration found for submenu key: ${submenuKey}`);
+    }
+
+    onSchemaChange(updatedSchema);
+    setEditingTab(null);
+  };
 
   const handleConfigureDashboardModal = useCallback(
     (slotName) => {
@@ -136,6 +176,7 @@ const InteractiveBuilder = ({ schema, onSchemaChange }: InteractiveBuilderProps)
               const submenuDetails = submenuConfig.configure[submenuKey];
               const subMenuSlot = submenuDetails?.slot;
               const subMenuSlotDetails = getSubMenuSlotDetails(schema, subMenuSlot);
+
               return (
                 <Accordion key={submenuKey}>
                   <AccordionItem title={submenuDetails?.title}>
@@ -149,58 +190,94 @@ const InteractiveBuilder = ({ schema, onSchemaChange }: InteractiveBuilderProps)
                       )}
                     </p>
 
-                    {subMenuSlotDetails?.configure?.[submenuDetails?.slot]?.tabDefinitions?.map((tabDefinition) => (
-                      <Tile className={styles.tileContainer}>
-                        <div className={styles.editStatusIcon}>
-                          <Button
-                            size="md"
-                            kind={'tertiary'}
-                            hasIconOnly
-                            renderIcon={(props) => <EditIcon size={16} {...props} />}
-                            iconDescription={t('editTabDefinition', 'Edit tab definition')}
-                          />
-                        </div>
-                        <p className={styles.subheading}>{t('tabName', 'Tab name')}</p>
-                        <p>{tabDefinition?.tabName}</p>
-                        <p className={styles.subheading}>{t('headerTitle', 'Header title')}</p>
-                        <p>{tabDefinition?.headerTitle}</p>
-                        <p className={styles.subheading}>{t('columns', 'Columns')}</p>
-                        {tabDefinition?.columns.map((column) => (
-                          <div className={styles.tileContent}>
-                            <p className={styles.content}>
-                              {t('title', 'Title')} : {column.title}
-                            </p>
-                            <p className={styles.content}>
-                              {t('concept', 'Concept')} : {column.concept}
-                            </p>
-                            <p className={styles.content}>
-                              {column.isDate && (
-                                <>
-                                  {t('date', 'Date')} : {column.isDate}
-                                </>
-                              )}{' '}
-                            </p>
-                            <p className={styles.content}>
-                              {column.isLink && (
-                                <>
-                                  {t('link', 'Link')} : {column.isLink}
-                                </>
-                              )}{' '}
-                            </p>
-                          </div>
-                        ))}
-                        <Button
-                          kind="ghost"
-                          renderIcon={AddIcon}
-                          onClick={() => {
-                            handleConfigureColumnsModal(submenuDetails, tabDefinition, DefinitionTypes.TAB_DEFINITION);
-                          }}
-                        >
-                          {t('configureColumns', 'Configure columns')}
-                        </Button>
-                      </Tile>
-                    ))}
-
+                    {subMenuSlotDetails?.configure?.[submenuDetails?.slot]?.tabDefinitions?.map(
+                      (tabDefinition, index) => (
+                        <Tile className={styles.tileContainer} key={tabDefinition?.tabName}>
+                          {editingTab === tabDefinition ? (
+                            <>
+                              <TextInput
+                                id="tab-name"
+                                labelText={t('tabName', 'Tab Name')}
+                                value={editedTabName}
+                                onChange={(e) => setEditedTabName(e.target.value)}
+                              />
+                              <TextInput
+                                id="header-title"
+                                labelText={t('headerTitle', 'Header Title')}
+                                value={editedHeaderTitle}
+                                onChange={(e) => setEditedHeaderTitle(e.target.value)}
+                              />
+                              <Button onClick={() => handleSaveTab(submenuKey, index)}>{t('save', 'Save')}</Button>
+                              <Button
+                                kind="tertiary"
+                                onClick={() => {
+                                  setEditingTab(null);
+                                  setEditedTabName('');
+                                  setEditedHeaderTitle('');
+                                }}
+                              >
+                                {t('cancel', 'Cancel')}
+                              </Button>
+                            </>
+                          ) : (
+                            <>
+                              <div className={styles.editStatusIcon}>
+                                <Button
+                                  size="md"
+                                  kind={'tertiary'}
+                                  hasIconOnly
+                                  renderIcon={(props) => <EditIcon size={16} {...props} />}
+                                  iconDescription={t('editTabDefinition', 'Edit tab definition')}
+                                  onClick={() => handleEditTab(tabDefinition)}
+                                />
+                              </div>
+                              <p className={styles.subheading}>{t('tabName', 'Tab name')}</p>
+                              <p>{tabDefinition?.tabName}</p>
+                              <p className={styles.subheading}>{t('headerTitle', 'Header title')}</p>
+                              <p>{tabDefinition?.headerTitle}</p>
+                              <p className={styles.subheading}>{t('columns', 'Columns')}</p>
+                              {tabDefinition?.columns.map((column) => (
+                                <div className={styles.tileContent}>
+                                  <p className={styles.content}>
+                                    {t('title', 'Title')} : {column.title}
+                                  </p>
+                                  <p className={styles.content}>
+                                    {t('concept', 'Concept')} : {column.concept}
+                                  </p>
+                                  <p className={styles.content}>
+                                    {column.isDate && (
+                                      <>
+                                        {t('date', 'Date')} : {column.isDate}
+                                      </>
+                                    )}{' '}
+                                  </p>
+                                  <p className={styles.content}>
+                                    {column.isLink && (
+                                      <>
+                                        {t('link', 'Link')} : {column.isLink}
+                                      </>
+                                    )}{' '}
+                                  </p>
+                                </div>
+                              ))}
+                              <Button
+                                kind="ghost"
+                                renderIcon={AddIcon}
+                                onClick={() => {
+                                  handleConfigureColumnsModal(
+                                    submenuDetails,
+                                    tabDefinition,
+                                    DefinitionTypes.TAB_DEFINITION,
+                                  );
+                                }}
+                              >
+                                {t('configureColumns', 'Configure columns')}
+                              </Button>
+                            </>
+                          )}
+                        </Tile>
+                      ),
+                    )}
                     {subMenuSlotDetails?.configure[submenuDetails?.slot]?.tilesDefinitions?.map((tileDefinition) => (
                       <Tile className={styles.tileContainer}>
                         <div className={styles.editStatusIcon}>
