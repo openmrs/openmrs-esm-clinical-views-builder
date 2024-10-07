@@ -17,6 +17,7 @@ const InteractiveBuilder = ({ schema, onSchemaChange }: InteractiveBuilderProps)
   const [editingTab, setEditingTab] = useState(null);
   const [editedTabName, setEditedTabName] = useState('');
   const [editedHeaderTitle, setEditedHeaderTitle] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
 
   const initializeSchema = useCallback(() => {
     const dummySchema: Schema = {
@@ -47,7 +48,6 @@ const InteractiveBuilder = ({ schema, onSchemaChange }: InteractiveBuilderProps)
       onSchemaChange,
     });
   }, [onSchemaChange, initializeSchema]);
-
   const launchAddClinicalViewMenuModal = useCallback(() => {
     const dispose = showModal('new-menu-modal', {
       closeModal: () => dispose(),
@@ -60,37 +60,50 @@ const InteractiveBuilder = ({ schema, onSchemaChange }: InteractiveBuilderProps)
     setEditingTab(tabDefinition);
     setEditedTabName(tabDefinition.tabName);
     setEditedHeaderTitle(tabDefinition.headerTitle);
+    setIsEditing(true);
   };
 
   const handleSaveTab = (submenuKey, tabIndex) => {
-    const updatedSchema = { ...schema };
+    const updatedSchema = JSON.parse(JSON.stringify(schema));
 
-    const configureEntry =
+    let configureEntry =
       updatedSchema['@openmrs/esm-patient-chart-app'].extensionSlots['patient-chart-dashboard-slot'].configure[
         submenuKey
       ];
 
-    if (configureEntry) {
-      if (!configureEntry.tabDefinitions) {
-        configureEntry.tabDefinitions = [];
-      }
-      configureEntry.tabDefinitions[tabIndex] = {
-        ...editingTab,
-        tabName: editedTabName,
-        headerTitle: editedHeaderTitle,
-      };
-      showSnackbar({
-        title: t('success', 'Success!'),
-        kind: 'success',
-        isLowContrast: true,
-        subtitle: t('tabEditedSuccessfully', 'Tab edited successfully!'),
-      });
-    } else {
-      console.error(`No configuration found for submenu key: ${submenuKey}`);
+    if (!configureEntry) {
+      configureEntry = { tabDefinitions: [] };
+      updatedSchema['@openmrs/esm-patient-chart-app'].extensionSlots['patient-chart-dashboard-slot'].configure[
+        submenuKey
+      ] = configureEntry;
     }
 
+    const updatedTabDefinition = {
+      ...editingTab,
+      tabName: editedTabName,
+      headerTitle: editedHeaderTitle,
+    };
+
+    configureEntry.tabDefinitions[tabIndex] = updatedTabDefinition;
+
     onSchemaChange(updatedSchema);
+
+    showSnackbar({
+      title: t('success', 'Success!'),
+      kind: 'success',
+      isLowContrast: true,
+      subtitle: t('tabEditedSuccessfully', 'Tab edited successfully!'),
+    });
+
+    setEditingTab(updatedTabDefinition);
+    setIsEditing(false);
+  };
+
+  const handleCancelEdit = () => {
     setEditingTab(null);
+    setEditedTabName('');
+    setEditedHeaderTitle('');
+    setIsEditing(false);
   };
 
   const handleConfigureDashboardModal = useCallback(
@@ -166,7 +179,6 @@ const InteractiveBuilder = ({ schema, onSchemaChange }: InteractiveBuilderProps)
           {t('interactiveBuilderInfo', 'Continue adding sub menus and configuring dashboards')}
         </span>
       )}
-
       {schema && (
         <div>
           <div className={styles.packageLabel}>{navGroupTitle}</div>
@@ -174,8 +186,7 @@ const InteractiveBuilder = ({ schema, onSchemaChange }: InteractiveBuilderProps)
           {submenuConfig ? (
             submenuConfig.add.map((submenuKey) => {
               const submenuDetails = submenuConfig.configure[submenuKey];
-              const subMenuSlot = submenuDetails?.slot;
-              const subMenuSlotDetails = getSubMenuSlotDetails(schema, subMenuSlot);
+              const subMenuSlotDetails = getSubMenuSlotDetails(schema, submenuDetails?.slot);
 
               return (
                 <Accordion key={submenuKey}>
@@ -207,20 +218,26 @@ const InteractiveBuilder = ({ schema, onSchemaChange }: InteractiveBuilderProps)
                                 value={editedHeaderTitle}
                                 onChange={(e) => setEditedHeaderTitle(e.target.value)}
                               />
-                              <Button onClick={() => handleSaveTab(submenuKey, index)}>{t('save', 'Save')}</Button>
-                              <Button
-                                kind="tertiary"
-                                onClick={() => {
-                                  setEditingTab(null);
-                                  setEditedTabName('');
-                                  setEditedHeaderTitle('');
-                                }}
-                              >
-                                {t('cancel', 'Cancel')}
-                              </Button>
+
+                              {isEditing && (
+                                <>
+                                  <Button onClick={() => handleSaveTab(submenuKey, index)}>{t('save', 'Save')}</Button>
+                                  <Button kind="tertiary" onClick={handleCancelEdit}>
+                                    {t('cancel', 'Cancel')}
+                                  </Button>
+                                </>
+                              )}
                             </>
                           ) : (
                             <>
+                              {editingTab && (
+                                <>
+                                  <p className={styles.subheading}>{t('tabName', 'Tab name')}</p>
+                                  <p>{editingTab.tabName}</p>
+                                  <p className={styles.subheading}>{t('headerTitle', 'Header title')}</p>
+                                  <p>{editingTab.headerTitle}</p>
+                                </>
+                              )}
                               <div className={styles.editStatusIcon}>
                                 <Button
                                   size="md"
@@ -235,6 +252,7 @@ const InteractiveBuilder = ({ schema, onSchemaChange }: InteractiveBuilderProps)
                               <p>{tabDefinition?.tabName}</p>
                               <p className={styles.subheading}>{t('headerTitle', 'Header title')}</p>
                               <p>{tabDefinition?.headerTitle}</p>
+
                               <p className={styles.subheading}>{t('columns', 'Columns')}</p>
                               {tabDefinition?.columns.map((column) => (
                                 <div className={styles.tileContent}>
