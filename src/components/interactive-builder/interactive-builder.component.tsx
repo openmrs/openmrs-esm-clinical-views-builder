@@ -132,10 +132,12 @@ const InteractiveBuilder = ({ schema, onSchemaChange }: InteractiveBuilderProps)
           <div className={styles.packageLabel}>{navGroupTitle}</div>
           <div className={styles.subHeading}>{t('clinicalViewMenus', 'Clinical View Submenus')}</div>
           {submenuConfig ? (
-            submenuConfig.add.map((submenuKey) => {
-              const submenuDetails = submenuConfig.configure[submenuKey];
+            submenuConfig.add?.map((submenuKey) => {
+              const submenuDetails = submenuConfig?.configure[submenuKey];
               const subMenuSlot = submenuDetails?.slot;
               const subMenuSlotDetails = getSubMenuSlotDetails(schema, subMenuSlot);
+              const configurationKey =
+                typeof subMenuSlotDetails?.configure === 'object' && Object.keys(subMenuSlotDetails?.configure)?.[0];
               return (
                 <Accordion key={submenuKey}>
                   <AccordionItem title={submenuDetails?.title}>
@@ -149,7 +151,7 @@ const InteractiveBuilder = ({ schema, onSchemaChange }: InteractiveBuilderProps)
                       )}
                     </p>
 
-                    {subMenuSlotDetails?.configure?.[submenuDetails?.slot]?.tabDefinitions?.map((tabDefinition) => (
+                    {subMenuSlotDetails?.configure?.[configurationKey]?.tabDefinitions?.map((tabDefinition) => (
                       <Tile className={styles.tileContainer}>
                         <div className={styles.editStatusIcon}>
                           <Button
@@ -168,24 +170,24 @@ const InteractiveBuilder = ({ schema, onSchemaChange }: InteractiveBuilderProps)
                         {tabDefinition?.columns.map((column) => (
                           <div className={styles.tileContent}>
                             <p className={styles.content}>
-                              {t('title', 'Title')} : {column.title}
+                              {t('title', 'Title')} : {column.title ?? '--'}
                             </p>
                             <p className={styles.content}>
-                              {t('concept', 'Concept')} : {column.concept}
+                              {t('concept', 'Concept')} : {column.concept ?? '--'}
                             </p>
                             <p className={styles.content}>
                               {column.isDate && (
                                 <>
-                                  {t('date', 'Date')} : {column.isDate}
+                                  {t('date', 'Date')} : {column.isDate.toString() ?? '--'}
                                 </>
-                              )}{' '}
+                              )}
                             </p>
                             <p className={styles.content}>
                               {column.isLink && (
                                 <>
-                                  {t('link', 'Link')} : {column.isLink}
+                                  {t('link', 'Link')} : {column.isLink.toString() ?? '--'}
                                 </>
-                              )}{' '}
+                              )}
                             </p>
                           </div>
                         ))}
@@ -201,7 +203,7 @@ const InteractiveBuilder = ({ schema, onSchemaChange }: InteractiveBuilderProps)
                       </Tile>
                     ))}
 
-                    {subMenuSlotDetails?.configure[submenuDetails?.slot]?.tilesDefinitions?.map((tileDefinition) => (
+                    {subMenuSlotDetails?.configure[configurationKey]?.tilesDefinitions?.map((tileDefinition) => (
                       <Tile className={styles.tileContainer}>
                         <div className={styles.editStatusIcon}>
                           <Button
@@ -218,10 +220,10 @@ const InteractiveBuilder = ({ schema, onSchemaChange }: InteractiveBuilderProps)
                         {tileDefinition?.columns.map((column) => (
                           <div className={styles.tileContent}>
                             <p className={styles.content}>
-                              {t('title', 'Title')} : {column.title}
+                              {t('title', 'Title')} : {column.title ?? '--'}
                             </p>
                             <p className={styles.content}>
-                              {t('concept', 'Concept')} : {column.concept}
+                              {t('concept', 'Concept')} : {column.concept ?? '--'}
                             </p>
                           </div>
                         ))}
