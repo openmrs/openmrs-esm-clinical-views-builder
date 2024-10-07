@@ -1,9 +1,9 @@
 import React, { useCallback } from 'react';
-import { showModal, AddIcon, EditIcon } from '@openmrs/esm-framework';
+import { showModal, AddIcon, EditIcon, TrashCanIcon } from '@openmrs/esm-framework';
 import { useTranslation } from 'react-i18next';
 import { v4 as uuidv4 } from 'uuid';
 import { Button, Accordion, AccordionItem, Tile } from '@carbon/react';
-import { DefinitionTypes, type DynamicExtensionSlot, type Schema } from '../../types';
+import { DefinitionTypes, WidgetTypes, type DynamicExtensionSlot, type Schema } from '../../types';
 import styles from './interactive-builder.scss';
 import { getSubMenuSlotDetails } from '../../helpers';
 
@@ -107,6 +107,21 @@ const InteractiveBuilder = ({ schema, onSchemaChange }: InteractiveBuilderProps)
     submenuSlotKey
   ] as DynamicExtensionSlot;
 
+  const handleDeleteConfigDetailModal = useCallback(
+    (slotDetails, tabDefinition, configurationKey, widgetType) => {
+      const dispose = showModal('delete-config-detail-modal', {
+        closeModal: () => dispose(),
+        schema,
+        onSchemaChange,
+        slotDetails,
+        tabDefinition,
+        configurationKey,
+        widgetType,
+      });
+    },
+    [schema, onSchemaChange],
+  );
+
   return (
     <div className={styles.interactiveBuilderContainer}>
       {!navGroupTitle ? (
@@ -161,6 +176,21 @@ const InteractiveBuilder = ({ schema, onSchemaChange }: InteractiveBuilderProps)
                             renderIcon={(props) => <EditIcon size={16} {...props} />}
                             iconDescription={t('editTabDefinition', 'Edit tab definition')}
                           />
+                          <Button
+                            size="md"
+                            kind={'tertiary'}
+                            hasIconOnly
+                            renderIcon={(props) => <TrashCanIcon size={16} {...props} />}
+                            iconDescription={t('deleteTabDefinition', 'Delete tab definition')}
+                            onClick={() => {
+                              handleDeleteConfigDetailModal(
+                                submenuDetails,
+                                tabDefinition,
+                                configurationKey,
+                                DefinitionTypes.TAB_DEFINITION,
+                              );
+                            }}
+                          />
                         </div>
                         <p className={styles.subheading}>{t('tabName', 'Tab name')}</p>
                         <p>{tabDefinition?.tabName}</p>
@@ -212,6 +242,21 @@ const InteractiveBuilder = ({ schema, onSchemaChange }: InteractiveBuilderProps)
                             hasIconOnly
                             renderIcon={(props) => <EditIcon size={16} {...props} />}
                             iconDescription={t('editTileDefinition', 'Edit tile definition')}
+                          />
+                          <Button
+                            size="md"
+                            kind={'tertiary'}
+                            hasIconOnly
+                            renderIcon={(props) => <TrashCanIcon size={16} {...props} />}
+                            iconDescription={t('deleteTileDefinition', 'Delete tile definition')}
+                            onClick={() => {
+                              handleDeleteConfigDetailModal(
+                                submenuDetails,
+                                tileDefinition,
+                                configurationKey,
+                                DefinitionTypes.TILE_DEFINITION,
+                              );
+                            }}
                           />
                         </div>
                         <p className={styles.subheading}>{t('headerTitle', 'Header title')}</p>

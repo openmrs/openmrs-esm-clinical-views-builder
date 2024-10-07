@@ -38,6 +38,10 @@
     {
       "name": "configure-columns-modal",
       "component": "configureColumnModal"
+    },
+    {
+      "name": "delete-config-detail-modal",
+      "component": "deleteConfigDetailModal"
     }
   ]
 }
