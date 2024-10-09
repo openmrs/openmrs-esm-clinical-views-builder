@@ -120,11 +120,11 @@
 .editStatusIcon {
   display: flex;
   justify-content: right;
+  gap: layout.$spacing-03;
 }
 
 .tileContainer {
   margin: layout.$spacing-03 0 layout.$spacing-03;
-  width:fit-content
 }
 
 .tileContent {

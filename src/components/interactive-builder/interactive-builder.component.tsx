@@ -1,9 +1,9 @@
 import React, { useState, useCallback } from 'react';
-import { showModal, AddIcon, EditIcon, showSnackbar } from '@openmrs/esm-framework';
+import { showModal, AddIcon, EditIcon, TrashCanIcon } from '@openmrs/esm-framework';
 import { useTranslation } from 'react-i18next';
 import { v4 as uuidv4 } from 'uuid';
 import { Button, Accordion, AccordionItem, Tile, TextInput } from '@carbon/react';
-import { DefinitionTypes, type DynamicExtensionSlot, type Schema } from '../../types';
+import { DefinitionTypes, WidgetTypes, type DynamicExtensionSlot, type Schema } from '../../types';
 import styles from './interactive-builder.scss';
 import { getSubMenuSlotDetails } from '../../helpers';
 
@@ -160,6 +160,21 @@ const InteractiveBuilder = ({ schema, onSchemaChange }: InteractiveBuilderProps)
     submenuSlotKey
   ] as DynamicExtensionSlot;
 
+  const handleDeleteConfigDetailModal = useCallback(
+    (slotDetails, tabDefinition, configurationKey, widgetType) => {
+      const dispose = showModal('delete-config-detail-modal', {
+        closeModal: () => dispose(),
+        schema,
+        onSchemaChange,
+        slotDetails,
+        tabDefinition,
+        configurationKey,
+        widgetType,
+      });
+    },
+    [schema, onSchemaChange],
+  );
+
   return (
     <div className={styles.interactiveBuilderContainer}>
       {!navGroupTitle ? (
@@ -184,10 +199,13 @@ const InteractiveBuilder = ({ schema, onSchemaChange }: InteractiveBuilderProps)
           <div className={styles.packageLabel}>{navGroupTitle}</div>
           <div className={styles.subHeading}>{t('clinicalViewMenus', 'Clinical View Submenus')}</div>
           {submenuConfig ? (
-            submenuConfig.add.map((submenuKey) => {
-              const submenuDetails = submenuConfig.configure[submenuKey];
-              const subMenuSlotDetails = getSubMenuSlotDetails(schema, submenuDetails?.slot);
 
+            submenuConfig.add?.map((submenuKey) => {
+              const submenuDetails = submenuConfig?.configure[submenuKey];
+              const subMenuSlot = submenuDetails?.slot;
+              const subMenuSlotDetails = getSubMenuSlotDetails(schema, subMenuSlot);
+              const configurationKey =
+                typeof subMenuSlotDetails?.configure === 'object' && Object.keys(subMenuSlotDetails?.configure)?.[0];
               return (
                 <Accordion key={submenuKey}>
                   <AccordionItem title={submenuDetails?.title}>
@@ -200,9 +218,8 @@ const InteractiveBuilder = ({ schema, onSchemaChange }: InteractiveBuilderProps)
                         'Now configure dashboards to show on the patient chart when this submenu is clicked.',
                       )}
                     </p>
-
-                    {subMenuSlotDetails?.configure?.[submenuDetails?.slot]?.tabDefinitions?.map(
-                      (tabDefinition, index) => (
+                    {subMenuSlotDetails?.configure?.[configurationKey]?.tabDefinitions?.map((tabDefinition) => (
+                                      (tabDefinition, index) => (
                         <Tile className={styles.tileContainer} key={tabDefinition?.tabName}>
                           {editingTab === tabDefinition ? (
                             <>
@@ -238,65 +255,73 @@ const InteractiveBuilder = ({ schema, onSchemaChange }: InteractiveBuilderProps)
                                   <p>{editingTab.headerTitle}</p>
                                 </>
                               )}
-                              <div className={styles.editStatusIcon}>
-                                <Button
-                                  size="md"
-                                  kind={'tertiary'}
-                                  hasIconOnly
-                                  renderIcon={(props) => <EditIcon size={16} {...props} />}
-                                  iconDescription={t('editTabDefinition', 'Edit tab definition')}
-                                  onClick={() => handleEditTab(tabDefinition)}
-                                />
-                              </div>
-                              <p className={styles.subheading}>{t('tabName', 'Tab name')}</p>
-                              <p>{tabDefinition?.tabName}</p>
-                              <p className={styles.subheading}>{t('headerTitle', 'Header title')}</p>
-                              <p>{tabDefinition?.headerTitle}</p>
+                          
+                        <div className={styles.editStatusIcon}>
+                          <Button
+                            size="md"
+                            kind={'tertiary'}
+                            hasIconOnly
+                            renderIcon={(props) => <EditIcon size={16} {...props} />}
+                            iconDescription={t('editTabDefinition', 'Edit tab definition')}
+                          />
+                          <Button
+                            size="md"
+                            kind={'tertiary'}
+                            hasIconOnly
+                            renderIcon={(props) => <TrashCanIcon size={16} {...props} />}
+                            iconDescription={t('deleteTabDefinition', 'Delete tab definition')}
+                            onClick={() => {
+                              handleDeleteConfigDetailModal(
+                                submenuDetails,
+                                tabDefinition,
+                                configurationKey,
+                                DefinitionTypes.TAB_DEFINITION,
+                              );
+                            }}
+                          />
+                        </div>
+                        <p className={styles.subheading}>{t('tabName', 'Tab name')}</p>
+                        <p>{tabDefinition?.tabName}</p>
+                        <p className={styles.subheading}>{t('headerTitle', 'Header title')}</p>
+                        <p>{tabDefinition?.headerTitle}</p>
+                        <p className={styles.subheading}>{t('columns', 'Columns')}</p>
+                        {tabDefinition?.columns.map((column) => (
+                          <div className={styles.tileContent}>
+                            <p className={styles.content}>
+                              {t('title', 'Title')} : {column.title ?? '--'}
+                            </p>
+                            <p className={styles.content}>
+                              {t('concept', 'Concept')} : {column.concept ?? '--'}
+                            </p>
+                            <p className={styles.content}>
+                              {column.isDate && (
+                                <>
+                                  {t('date', 'Date')} : {column.isDate.toString() ?? '--'}
+                                </>
+                              )}
+                            </p>
+                            <p className={styles.content}>
+                              {column.isLink && (
+                                <>
+                                  {t('link', 'Link')} : {column.isLink.toString() ?? '--'}
+                                </>
+                              )}
+                            </p>
+                          </div>
+                        ))}
+                        <Button
+                          kind="ghost"
+                          renderIcon={AddIcon}
+                          onClick={() => {
+                            handleConfigureColumnsModal(submenuDetails, tabDefinition, DefinitionTypes.TAB_DEFINITION);
+                          }}
+                        >
+                          {t('configureColumns', 'Configure columns')}
+                        </Button>
+                      </Tile>
+                    ))}
 
-                              <p className={styles.subheading}>{t('columns', 'Columns')}</p>
-                              {tabDefinition?.columns.map((column) => (
-                                <div className={styles.tileContent}>
-                                  <p className={styles.content}>
-                                    {t('title', 'Title')} : {column.title}
-                                  </p>
-                                  <p className={styles.content}>
-                                    {t('concept', 'Concept')} : {column.concept}
-                                  </p>
-                                  <p className={styles.content}>
-                                    {column.isDate && (
-                                      <>
-                                        {t('date', 'Date')} : {column.isDate}
-                                      </>
-                                    )}{' '}
-                                  </p>
-                                  <p className={styles.content}>
-                                    {column.isLink && (
-                                      <>
-                                        {t('link', 'Link')} : {column.isLink}
-                                      </>
-                                    )}{' '}
-                                  </p>
-                                </div>
-                              ))}
-                              <Button
-                                kind="ghost"
-                                renderIcon={AddIcon}
-                                onClick={() => {
-                                  handleConfigureColumnsModal(
-                                    submenuDetails,
-                                    tabDefinition,
-                                    DefinitionTypes.TAB_DEFINITION,
-                                  );
-                                }}
-                              >
-                                {t('configureColumns', 'Configure columns')}
-                              </Button>
-                            </>
-                          )}
-                        </Tile>
-                      ),
-                    )}
-                    {subMenuSlotDetails?.configure[submenuDetails?.slot]?.tilesDefinitions?.map((tileDefinition) => (
+                    {subMenuSlotDetails?.configure[configurationKey]?.tilesDefinitions?.map((tileDefinition) => (
                       <Tile className={styles.tileContainer}>
                         <div className={styles.editStatusIcon}>
                           <Button
@@ -306,6 +331,21 @@ const InteractiveBuilder = ({ schema, onSchemaChange }: InteractiveBuilderProps)
                             renderIcon={(props) => <EditIcon size={16} {...props} />}
                             iconDescription={t('editTileDefinition', 'Edit tile definition')}
                           />
+                          <Button
+                            size="md"
+                            kind={'tertiary'}
+                            hasIconOnly
+                            renderIcon={(props) => <TrashCanIcon size={16} {...props} />}
+                            iconDescription={t('deleteTileDefinition', 'Delete tile definition')}
+                            onClick={() => {
+                              handleDeleteConfigDetailModal(
+                                submenuDetails,
+                                tileDefinition,
+                                configurationKey,
+                                DefinitionTypes.TILE_DEFINITION,
+                              );
+                            }}
+                          />
                         </div>
                         <p className={styles.subheading}>{t('headerTitle', 'Header title')}</p>
                         <p>{tileDefinition?.tilesHeader}</p>
@@ -313,10 +353,10 @@ const InteractiveBuilder = ({ schema, onSchemaChange }: InteractiveBuilderProps)
                         {tileDefinition?.columns.map((column) => (
                           <div className={styles.tileContent}>
                             <p className={styles.content}>
-                              {t('title', 'Title')} : {column.title}
+                              {t('title', 'Title')} : {column.title ?? '--'}
                             </p>
                             <p className={styles.content}>
-                              {t('concept', 'Concept')} : {column.concept}
+                              {t('concept', 'Concept')} : {column.concept ?? '--'}
                             </p>
                           </div>
                         ))}

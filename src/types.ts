@@ -253,3 +253,8 @@ export enum DefinitionTypes {
   TAB_DEFINITION = 'tabDefinitions',
   TILE_DEFINITION = 'tilesDefinitions',
 }
+
+export enum WidgetTypes {
+  ENCOUNTER_LIST_TABLE_TABS = 'encounter-list-table-tabs',
+  PROGRAM_SUMMARY = 'program-summary',
+}
