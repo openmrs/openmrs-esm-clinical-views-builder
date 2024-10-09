@@ -120,6 +120,7 @@
 .editStatusIcon {
   display: flex;
   justify-content: right;
+  gap: layout.$spacing-03;
 }
 
 .tileContainer {

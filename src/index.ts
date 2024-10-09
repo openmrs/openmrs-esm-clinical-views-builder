@@ -39,3 +39,8 @@ export const configureColumnModal = getAsyncLifecycle(
   () => import('./components/interactive-builder/add-columns-modal.component'),
   options,
 );
+
+export const deleteConfigDetailModal = getAsyncLifecycle(
+  () => import('./components/interactive-builder/delete-config-detail-modal.component'),
+  options,
+);
