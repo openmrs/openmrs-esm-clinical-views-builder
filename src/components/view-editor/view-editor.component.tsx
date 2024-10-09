@@ -5,7 +5,7 @@ import { Column, CopyButton, Grid, IconButton, Button, FileUploader } from '@car
 import { type TFunction, useTranslation } from 'react-i18next';
 import { ArrowLeft, Maximize, Minimize, Download } from '@carbon/react/icons';
 import Header from '../header/header.component';
-import { ConfigurableLink, showSnackbar } from '@openmrs/esm-framework';
+import { type ConfigObject, ConfigurableLink, showSnackbar, useConfig } from '@openmrs/esm-framework';
 import SchemaEditor from '../schema-editor/schema-editor.component';
 import InteractiveBuilder from '../interactive-builder/interactive-builder.component';
 import { type Schema } from '../../types';
@@ -25,6 +25,7 @@ const ContentPackagesEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
 
   const { clinicalViewId } = useParams(); // Extract 'id' from the URL
   const location = useLocation(); // To check if it's in 'edit' mode
+  const { patientUuid } = useConfig<ConfigObject>();
 
   useEffect(() => {
     if (clinicalViewId && location.pathname.includes('edit')) {
@@ -33,7 +34,7 @@ const ContentPackagesEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
   }, [clinicalViewId, location]);
 
   const loadSchema = (id: string) => {
-    const savedSchema = localStorage.getItem(`packageJSON_${id}`);
+    const savedSchema = localStorage.getItem(id);
     if (savedSchema) {
       const parsedSchema: Schema = JSON.parse(savedSchema);
       setSchema(parsedSchema);
@@ -56,10 +57,18 @@ const ContentPackagesEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
   }, []);
 
   const renderSchemaChanges = useCallback(() => {
+    if (!stringifiedSchema) {
+      showSnackbar({
+        title: t('errorRendering', 'Error rendering'),
+        kind: 'error',
+        subtitle: t('renderingErrorMessage', 'There was an error rendering the clinical view'),
+      });
+      return;
+    }
     const parsedJson: Schema = JSON.parse(stringifiedSchema);
     updateSchema(parsedJson);
     setStringifiedSchema(JSON.stringify(parsedJson, null, 2));
-  }, [stringifiedSchema, updateSchema]);
+  }, [stringifiedSchema, updateSchema, t]);
 
   const inputDummySchema = useCallback(() => {
     const dummySchema: Schema = {
@@ -149,12 +158,12 @@ const ContentPackagesEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
 
   const handleSavePackage = () => {
     setIsSaving(true);
-    if (schema && schema.id) {
-      const existingSchema = localStorage.getItem(`packageJSON_${schema.id}`);
-
+    const schemaId = Object.keys(schema)?.[0];
+    if (schema && schemaId) {
+      const existingSchema = localStorage.getItem(schemaId);
       if (existingSchema) {
         // If it exists, update the schema
-        localStorage.setItem(`packageJSON_${schema.id}`, JSON.stringify(schema));
+        localStorage.setItem(schemaId, JSON.stringify(schema));
         showSnackbar({
           title: t('clinicalViewUpdated', 'Clinical view updated'),
           kind: 'success',
@@ -162,7 +171,7 @@ const ContentPackagesEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
         });
         setIsSaving(false);
       } else {
-        localStorage.setItem(`packageJSON_${schema.id}`, JSON.stringify(schema));
+        localStorage.setItem(schemaId, JSON.stringify(schema));
         showSnackbar({
           title: t('clinicalViewCreated', 'Clinical view saved'),
           kind: 'success',
@@ -178,6 +187,10 @@ const ContentPackagesEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
         subtitle: t('savingErrorMessage', 'There was an error saving a clinical view'),
       });
     }
+  };
+
+  const handlePreviewPackage = () => {
+    window.open(window.getOpenmrsSpaBase() + `patient/${patientUuid}/chart/Patient%20Summary`);
   };
 
   const navGroupTitle = getNavGroupTitle(schema);
@@ -266,6 +279,9 @@ const ContentPackagesEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
                 {schema && clinicalViewId
                   ? t('updateSchema', 'Update Schema')
                   : t('saveClinicalView', 'Save clinical view')}
+              </Button>
+              <Button disabled={!navGroupTitle || isSaving} onClick={handlePreviewPackage}>
+                {schema && t('previewClinicalView', 'Preview clinical view')}
               </Button>
             </div>
           </div>
