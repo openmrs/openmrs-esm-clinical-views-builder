@@ -54,6 +54,7 @@ export interface Column {
 }
 
 export interface TabDefinition {
+  id: any;
   tabName: string;
   headerTitle: string;
   displayText: string;
