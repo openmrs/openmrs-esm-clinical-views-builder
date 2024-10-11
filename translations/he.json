@@ -90,6 +90,7 @@
   "success": "הצלחה!",
   "tabColumnsCreated": "Tab columns created",
   "tabConfigurationDeleted": "Tab configuration deleted",
+  "tabEditedSuccessfully": "Tab edited successfully!",
   "tabName": "Tab name",
   "tabNamePlaceholder": "e.g. Clinical Visit",
   "title": "Title",
