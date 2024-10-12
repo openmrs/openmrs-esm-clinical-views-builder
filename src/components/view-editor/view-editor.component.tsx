@@ -11,6 +11,7 @@ import InteractiveBuilder from '../interactive-builder/interactive-builder.compo
 import { type Schema } from '../../types';
 
 import styles from './view-editor.scss';
+import { updateSchemaInConfig } from '../../helpers';
 
 interface TranslationFnProps {
   t: TFunction;
@@ -59,7 +60,7 @@ const ContentPackagesEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
   const renderSchemaChanges = useCallback(() => {
     if (!stringifiedSchema) {
       showSnackbar({
-        title: t('errorRendering', 'Error rendering'),
+        title: t('renderingError', 'Rendering error'),
         kind: 'error',
         subtitle: t('renderingErrorMessage', 'There was an error rendering the clinical view'),
       });
@@ -162,8 +163,7 @@ const ContentPackagesEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
     if (schema && schemaId) {
       const existingSchema = localStorage.getItem(schemaId);
       if (existingSchema) {
-        // If it exists, update the schema
-        localStorage.setItem(schemaId, JSON.stringify(schema));
+        updateSchemaInConfig(schemaId, schema);
         showSnackbar({
           title: t('clinicalViewUpdated', 'Clinical view updated'),
           kind: 'success',
@@ -171,7 +171,7 @@ const ContentPackagesEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
         });
         setIsSaving(false);
       } else {
-        localStorage.setItem(schemaId, JSON.stringify(schema));
+        updateSchemaInConfig(schemaId, schema);
         showSnackbar({
           title: t('clinicalViewCreated', 'Clinical view saved'),
           kind: 'success',
@@ -189,7 +189,7 @@ const ContentPackagesEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
     }
   };
 
-  const handlePreviewPackage = () => {
+  const handlePreviewClinicalView = () => {
     window.open(window.getOpenmrsSpaBase() + `patient/${patientUuid}/chart/Patient%20Summary`);
   };
 
@@ -280,7 +280,7 @@ const ContentPackagesEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
                   ? t('updateSchema', 'Update Schema')
                   : t('saveClinicalView', 'Save clinical view')}
               </Button>
-              <Button disabled={!navGroupTitle || isSaving} onClick={handlePreviewPackage}>
+              <Button disabled={!navGroupTitle || isSaving} onClick={handlePreviewClinicalView}>
                 {schema && t('previewClinicalView', 'Preview clinical view')}
               </Button>
             </div>
