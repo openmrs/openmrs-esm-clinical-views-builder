@@ -157,7 +157,7 @@ const ContentPackagesEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
     return '';
   };
 
-  const handleSavePackage = () => {
+  const handleSaveClinicalView = () => {
     setIsSaving(true);
     const schemaId = Object.keys(schema)?.[0];
     if (schema && schemaId) {
@@ -275,7 +275,7 @@ const ContentPackagesEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
           <div className={styles.heading}>
             <span className={styles.tabHeading}>{t('interactiveBuilder', 'Interactive Builder')}</span>
             <div className={styles.topBtns}>
-              <Button disabled={!navGroupTitle || isSaving} onClick={handleSavePackage}>
+              <Button disabled={!navGroupTitle || isSaving} onClick={handleSaveClinicalView}>
                 {schema && clinicalViewId
                   ? t('updateSchema', 'Update Schema')
                   : t('saveClinicalView', 'Save clinical view')}
