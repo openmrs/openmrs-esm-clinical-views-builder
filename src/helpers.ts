@@ -23,3 +23,7 @@ export const toCamelCase = (str: string) => {
 export const isValidSlotName = (slotName: string) => {
   return /^[a-zA-Z0-9-]+$/.test(slotName);
 };
+
+export const updateSchemaInConfig = (schemaId, schema) => {
+  localStorage.setItem(schemaId, JSON.stringify(schema));
+};
