@@ -1,10 +1,11 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 import { useTranslation } from 'react-i18next';
 import { showSnackbar } from '@openmrs/esm-framework';
 import NewSubMenuModal from './add-submenu-modal.component';
 import { type Schema } from '../../types';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('react-i18next', () => ({
   useTranslation: jest.fn(),
@@ -26,7 +27,7 @@ describe('NewSubMenuModal', () => {
           configure: {
             'nav-group#example': {
               slotName: 'example-slot',
-              title: 'Example Title', // Add the missing title property here
+              title: 'Example Title',
             },
           },
         },
@@ -61,7 +62,7 @@ describe('NewSubMenuModal', () => {
           'patient-chart-dashboard-slot': {
             add: [],
             configure: {},
-          }, // Add 'patient-chart-dashboard-slot' here, even if it's empty
+          },
         },
       },
     };
@@ -78,12 +79,12 @@ describe('NewSubMenuModal', () => {
   });
 
   it('updates schema and shows success snackbar on valid input', async () => {
+    const user = userEvent.setup();
     render(<NewSubMenuModal schema={schema} onSchemaChange={onSchemaChange} closeModal={closeModal} />);
 
-    fireEvent.change(screen.getByLabelText('programIdentifier'), { target: { value: 'Hiv Care and Treatment' } });
-    fireEvent.change(screen.getByLabelText('menuName'), { target: { value: 'Patient Summary' } });
-
-    fireEvent.click(screen.getByText('createSubMenu'));
+    await user.type(screen.getByLabelText('programIdentifier'), 'Hiv Care and Treatment');
+    await user.type(screen.getByLabelText('menuName'), 'Patient Summary');
+    await user.click(screen.getByText('createSubMenu'));
 
     await waitFor(() => {
       expect(onSchemaChange).toHaveBeenCalled();
@@ -100,9 +101,8 @@ describe('NewSubMenuModal', () => {
   it('disables create button if inputs are empty', () => {
     render(<NewSubMenuModal schema={schema} onSchemaChange={onSchemaChange} closeModal={closeModal} />);
 
-    // Find the button by its role instead of using getByText
     const createButton = screen.getByRole('button', { name: 'createSubMenu' });
 
-    expect(createButton).toBeDisabled(); // This should now work as you're targeting the actual button
+    expect(createButton).toBeDisabled();
   });
 });

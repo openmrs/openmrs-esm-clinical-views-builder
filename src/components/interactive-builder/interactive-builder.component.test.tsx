@@ -1,10 +1,11 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 import { showModal, showSnackbar } from '@openmrs/esm-framework';
 import InteractiveBuilder from './interactive-builder.component';
 import { v4 as uuidv4 } from 'uuid';
 import { type Schema } from '../../types';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('@openmrs/esm-framework', () => ({
   showModal: jest.fn(),
@@ -22,7 +23,7 @@ describe('InteractiveBuilder', () => {
     '@openmrs/esm-patient-chart-app': {
       extensionSlots: {
         'patient-chart-dashboard-slot': {
-          add: ['navGroup1'], // This ensures that submenus are added
+          add: ['navGroup1'],
           configure: {
             navGroup1: {
               title: 'Sample Clinical View',
@@ -61,18 +62,16 @@ describe('InteractiveBuilder', () => {
   it('renders interactive builder with initial state and start button', () => {
     render(<InteractiveBuilder schema={null} onSchemaChange={mockOnSchemaChange} />);
 
-    // Check that the explainer text and start button are rendered
     expect(screen.getByText(/interactive builder/i)).toBeInTheDocument();
     expect(screen.getByText(/start building/i)).toBeInTheDocument();
   });
 
-  it('opens the "Add Clinical View" modal when start button is clicked', () => {
+  it('opens the "Add Clinical View" modal when start button is clicked', async () => {
+    const user = userEvent.setup();
     render(<InteractiveBuilder schema={null} onSchemaChange={mockOnSchemaChange} />);
 
-    // Simulate click on start button
-    fireEvent.click(screen.getByText(/start building/i));
+    await user.click(screen.getByText(/start building/i));
 
-    // Expect showModal to be called with correct arguments
     expect(showModal).toHaveBeenCalledWith(
       'new-package-modal',
       expect.objectContaining({
@@ -81,13 +80,12 @@ describe('InteractiveBuilder', () => {
     );
   });
 
-  it('opens the "Add Submenu" modal when "Add Submenu" button is clicked', () => {
+  it('opens the "Add Submenu" modal when "Add Submenu" button is clicked', async () => {
+    const user = userEvent.setup();
     render(<InteractiveBuilder schema={mockSchema} onSchemaChange={mockOnSchemaChange} />);
 
-    // Simulate click on "Add Submenu" button
-    fireEvent.click(screen.getByText(/add clinical view submenu/i));
+    await user.click(screen.getByText(/add clinical view submenu/i));
 
-    // Expect showModal to be called with correct arguments
     expect(showModal).toHaveBeenCalledWith(
       'new-menu-modal',
       expect.objectContaining({

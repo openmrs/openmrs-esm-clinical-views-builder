@@ -23,7 +23,7 @@ moduleNameMapper: {
   '^lodash-es/(.*)$': 'lodash/$1',
   'lodash-es': 'lodash',
   '^dexie$': require.resolve('dexie'),
-  '^@testing-library/jest-dom/extend-expect$': '@testing-library/jest-dom', // <-- Add this line
+  '^@testing-library/jest-dom/extend-expect$': '@testing-library/jest-dom',
 },
   setupFilesAfterEnv: ['<rootDir>/src/setup-tests.ts'],
   testPathIgnorePatterns: [path.resolve(__dirname, 'e2e')],

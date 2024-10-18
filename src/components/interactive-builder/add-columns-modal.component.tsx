@@ -92,8 +92,6 @@ const ConfigureDashboardModal: React.FC<ConfigureDashboardModalProps> = ({
         },
       };
       onSchemaChange(updatedSchema);
-
-      // Show success notification
       setColumnTitle('');
       setColumnConcept('');
       setIsColumnDate(false);
@@ -218,20 +216,20 @@ const ConfigureDashboardModal: React.FC<ConfigureDashboardModalProps> = ({
                 name="isDate"
                 orientation="horizontal"
                 legendText={t('isDate', 'Is date')}
-                defaultSelected={isColumnDate ? 'true' : 'false'} // Cast boolean to string
-                onChange={(value) => setIsColumnDate(value === 'true')} // Convert string back to boolean
+                defaultSelected={isColumnDate ? 'true' : 'false'}
+                onChange={(value) => setIsColumnDate(value === 'true')}
               >
                 <RadioButton
                   className={styles.radioButton}
                   id="isDateTrue"
                   labelText={t('true', 'True')}
-                  value="true" // Value as string
+                  value="true"
                 />
                 <RadioButton
                   className={styles.radioButton}
                   id="isDateFalse"
                   labelText={t('false', 'False')}
-                  value="false" // Value as string
+                  value="false"
                 />
               </RadioButtonGroup>
 
@@ -240,20 +238,20 @@ const ConfigureDashboardModal: React.FC<ConfigureDashboardModalProps> = ({
                 orientation="horizontal"
                 legendText={t('isLink', 'Is link')}
                 className={styles.label}
-                defaultSelected={isColumnLink ? 'true' : 'false'} // Cast boolean to string
-                onChange={(value) => setIsColumnLink(value === 'true')} // Convert string back to boolean
+                defaultSelected={isColumnLink ? 'true' : 'false'}
+                onChange={(value) => setIsColumnLink(value === 'true')}
               >
                 <RadioButton
                   className={styles.radioButton}
                   id="isLinkTrue"
                   labelText={t('true', 'True')}
-                  value="true" // Value as string
+                  value="true"
                 />
                 <RadioButton
                   className={styles.radioButton}
                   id="isLinkFalse"
                   labelText={t('false', 'False')}
-                  value="false" // Value as string
+                  value="false"
                 />
               </RadioButtonGroup>
             </FormGroup>

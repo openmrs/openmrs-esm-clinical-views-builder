@@ -116,11 +116,11 @@ const mockProps = {
     launchOptions: { displayText: 'Launch Tab 1' },
     formList: [],
   },
-  definitionType: DefinitionTypes.TAB_DEFINITION, // Use the enum value
+  definitionType: DefinitionTypes.TAB_DEFINITION,
 };
 
 describe('ConfigureDashboardModal', () => {
-  const user = userEvent.setup(); // Initialize userEvent
+  const user = userEvent.setup();
 
   it('renders without crashing', () => {
     render(<ConfigureDashboardModal {...mockProps} />);

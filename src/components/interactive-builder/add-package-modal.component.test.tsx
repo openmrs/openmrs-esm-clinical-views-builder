@@ -1,10 +1,11 @@
 import React from 'react';
-import { render, fireEvent, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 import { useTranslation } from 'react-i18next';
 import { showSnackbar } from '@openmrs/esm-framework';
 import PackageModal from './add-package-modal.component';
 import type { Schema } from '../../types';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('react-i18next', () => ({
   useTranslation: jest.fn(),
@@ -57,31 +58,34 @@ describe('PackageModal', () => {
     expect(screen.getByText('save')).toBeInTheDocument();
   });
 
-  it('updates key when title changes', () => {
+  it('updates key when title changes', async () => {
+    const user = userEvent.setup();
     render(<PackageModal closeModal={closeModal} schema={schema} onSchemaChange={onSchemaChange} />);
 
-    fireEvent.change(screen.getByLabelText('enterClinicalViewTitle'), { target: { value: 'New Title' } });
+    await user.type(screen.getByLabelText('enterClinicalViewTitle'), 'New Title');
 
     expect(mockToCamelCase).toHaveBeenCalledWith('New Title');
   });
 
-  it('shows error when slot name is invalid', () => {
+  it('shows error when slot name is invalid', async () => {
     mockIsValidSlotName.mockReturnValue(false);
+    const user = userEvent.setup();
 
     render(<PackageModal closeModal={closeModal} schema={schema} onSchemaChange={onSchemaChange} />);
 
-    fireEvent.change(screen.getByLabelText('enterSlotName'), { target: { value: 'Invalid Slot Name' } });
+    await user.type(screen.getByLabelText('enterSlotName'), 'Invalid Slot Name');
 
     expect(screen.getByText('invalidSlotName')).toBeInTheDocument();
   });
 
-  it('calls updatePackages and closeModal on save', () => {
+  it('calls updatePackages and closeModal on save', async () => {
+    const user = userEvent.setup();
     render(<PackageModal closeModal={closeModal} schema={schema} onSchemaChange={onSchemaChange} />);
 
-    fireEvent.change(screen.getByLabelText('enterClinicalViewTitle'), { target: { value: 'New Title' } });
-    fireEvent.change(screen.getByLabelText('enterSlotName'), { target: { value: 'valid-slot-name' } });
+    await user.type(screen.getByLabelText('enterClinicalViewTitle'), 'New Title');
+    await user.type(screen.getByLabelText('enterSlotName'), 'valid-slot-name');
 
-    fireEvent.click(screen.getByText('save'));
+    await user.click(screen.getByText('save'));
 
     expect(onSchemaChange).toHaveBeenCalled();
     expect(closeModal).toHaveBeenCalled();
@@ -93,17 +97,18 @@ describe('PackageModal', () => {
     });
   });
 
-  it('shows error snackbar on updatePackages error', () => {
+  it('shows error snackbar on updatePackages error', async () => {
+    const user = userEvent.setup();
     onSchemaChange.mockImplementation(() => {
       throw new Error('Test error');
     });
 
     render(<PackageModal closeModal={closeModal} schema={schema} onSchemaChange={onSchemaChange} />);
 
-    fireEvent.change(screen.getByLabelText('enterClinicalViewTitle'), { target: { value: 'New Title' } });
-    fireEvent.change(screen.getByLabelText('enterSlotName'), { target: { value: 'valid-slot-name' } });
+    await user.type(screen.getByLabelText('enterClinicalViewTitle'), 'New Title');
+    await user.type(screen.getByLabelText('enterSlotName'), 'valid-slot-name');
 
-    fireEvent.click(screen.getByText('save'));
+    await user.click(screen.getByText('save'));
 
     expect(mockShowSnackbar).toHaveBeenCalledWith({
       title: 'errorCreatingPackage',

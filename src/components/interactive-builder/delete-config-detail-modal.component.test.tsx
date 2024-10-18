@@ -1,10 +1,9 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 import DeleteConfigDetailModal from './delete-config-detail-modal.component';
-import { showSnackbar } from '@openmrs/esm-framework';
-import { useTranslation } from 'react-i18next';
 import { WidgetTypes } from '../../types';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('@openmrs/esm-framework', () => ({
   showSnackbar: jest.fn(),
@@ -27,12 +26,12 @@ const mockProps = {
         'patient-chart-dashboard-slot': {
           configure: {
             configKey1: {
-              title: 'Sample Title', // Required property
-              slotName: 'sample-slot', // Required property
-              isExpanded: true, // Optional
+              title: 'Sample Title',
+              slotName: 'sample-slot',
+              isExpanded: true,
               tabDefinitions: [
                 {
-                  id: 'tab1', // Add id property here
+                  id: 'tab1',
                   tabName: 'tab1',
                   headerTitle: 'Header 1',
                   displayText: 'Tab 1',
@@ -48,8 +47,8 @@ const mockProps = {
         slot1: {
           configure: {
             configKey1: {
-              title: 'Another Title', // Add required title here
-              slotName: 'slot1', // Add required slotName here
+              title: 'Another Title',
+              slotName: 'slot1',
               widgetType1: [{ tabName: 'tab1' }],
             },
           },
@@ -59,22 +58,22 @@ const mockProps = {
   },
   onSchemaChange: mockOnSchemaChange,
   slotDetails: {
-    title: 'Sample Slot Title', // Required by DashboardConfig
-    path: 'sample/slot/path', // Required by DashboardConfig
-    slot: 'slot1', // Slot identifier
+    title: 'Sample Slot Title',
+    path: 'sample/slot/path',
+    slot: 'slot1',
   },
   tabDefinition: {
-    id: 'tab1', // Add required id
+    id: 'tab1',
     tabName: 'tab1',
     headerTitle: 'Header 1',
-    displayText: 'Tab 1', // Add required displayText
-    encounterType: 'encounter1', // Add required encounterType
-    columns: [], // Add required columns
-    launchOptions: { displayText: 'Launch' }, // Add required launchOptions
-    formList: [], // Add required formList
+    displayText: 'Tab 1',
+    encounterType: 'encounter1',
+    columns: [],
+    launchOptions: { displayText: 'Launch' },
+    formList: [],
   },
   configurationKey: 'configKey1',
-  widgetType: WidgetTypes.ENCOUNTER_LIST_TABLE_TABS, // Updated to match WidgetTypes
+  widgetType: WidgetTypes.ENCOUNTER_LIST_TABLE_TABS,
 };
 
 describe('DeleteConfigDetailModal', () => {
@@ -87,10 +86,11 @@ describe('DeleteConfigDetailModal', () => {
     expect(screen.getByText('headerTitle : Header 1')).toBeInTheDocument();
   });
 
-  it('calls closeModal when cancel button is clicked', () => {
+  it('calls closeModal when cancel button is clicked', async () => {
+    const user = userEvent.setup();
     render(<DeleteConfigDetailModal {...mockProps} />);
 
-    fireEvent.click(screen.getByText('cancel'));
+    await user.click(screen.getByText('cancel'));
     expect(mockCloseModal).toHaveBeenCalled();
   });
 });

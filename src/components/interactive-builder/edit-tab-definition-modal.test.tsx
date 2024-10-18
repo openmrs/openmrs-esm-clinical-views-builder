@@ -1,11 +1,12 @@
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 import { I18nextProvider } from 'react-i18next';
 import i18n from 'i18next';
 import EditTabDefinitionModal from './edit-tab-definition-modal';
+import userEvent from '@testing-library/user-event';
 
-const renderWithI18n = (ui) => {
+const renderWithI18n = (ui: React.ReactElement) => {
   return render(<I18nextProvider i18n={i18n}>{ui}</I18nextProvider>);
 };
 
@@ -27,15 +28,19 @@ describe('EditTabDefinitionModal', () => {
     expect(getByLabelText('Header Title')).toHaveValue('Initial Header');
   });
 
-  it('calls onSave with updated values', () => {
+  it('calls onSave with updated values', async () => {
+    const user = userEvent.setup();
     const { getByLabelText, getByText } = renderWithI18n(
       <EditTabDefinitionModal tabDefinition={tabDefinition} onSave={mockOnSave} onCancel={mockOnCancel} />,
     );
 
-    fireEvent.change(getByLabelText('Tab Name'), { target: { value: 'Updated Tab' } });
-    fireEvent.change(getByLabelText('Header Title'), { target: { value: 'Updated Header' } });
+    await user.clear(getByLabelText('Tab Name'));
+    await user.type(getByLabelText('Tab Name'), 'Updated Tab');
 
-    fireEvent.click(getByText('Save'));
+    await user.clear(getByLabelText('Header Title'));
+    await user.type(getByLabelText('Header Title'), 'Updated Header');
+
+    await user.click(getByText('Save'));
 
     expect(mockOnSave).toHaveBeenCalledWith({
       ...tabDefinition,
@@ -44,12 +49,13 @@ describe('EditTabDefinitionModal', () => {
     });
   });
 
-  it('calls onCancel when cancel button is clicked', () => {
+  it('calls onCancel when cancel button is clicked', async () => {
+    const user = userEvent.setup();
     const { getByText } = renderWithI18n(
       <EditTabDefinitionModal tabDefinition={tabDefinition} onSave={mockOnSave} onCancel={mockOnCancel} />,
     );
 
-    fireEvent.click(getByText('Cancel'));
+    await user.click(getByText('Cancel'));
 
     expect(mockOnCancel).toHaveBeenCalled();
   });
