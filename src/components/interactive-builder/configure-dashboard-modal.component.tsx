@@ -135,7 +135,7 @@ const ConfigureDashboardModal: React.FC<ConfigureDashboardModalProps> = ({
                   setSelectedWidget(event.target.value);
                 }}
               >
-                {!selectedWidget && <SelectItem text={t('selectWidget', 'Select a widget')} />}
+                {!selectedWidget && <SelectItem text={t('selectWidget', 'Select a widget')} value="" />}
                 {availableWidgets.length === 0 && <SelectItem text={t('noWidgetsAvailable', 'No widgets available')} />}
                 {availableWidgets?.length > 0 &&
                   availableWidgets.map((widget) => (
