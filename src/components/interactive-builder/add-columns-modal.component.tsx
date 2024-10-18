@@ -160,10 +160,10 @@ const ConfigureDashboardModal: React.FC<ConfigureDashboardModalProps> = ({
                   setEncounterType(event.target.value);
                 }}
               >
-                {!encounterType && <SelectItem text={t('selectEncounterType', 'Select an encounter type')} />}
+                {!encounterType && <SelectItem text={t('selectEncounterType', 'Select an encounter type')} value="" />}
                 {encounterTypes.length === 0 ||
                   (encounterTypesError && (
-                    <SelectItem text={t('noEncounterTypesAvailable', 'No encounter types available')} />
+                    <SelectItem text={t('noEncounterTypesAvailable', 'No encounter types available')} value="" />
                   ))}
                 {encounterTypes?.length > 0 &&
                   encounterTypes.map((encounterType) => (
@@ -193,9 +193,11 @@ const ConfigureDashboardModal: React.FC<ConfigureDashboardModalProps> = ({
                   setColumnConcept(event.target.value);
                 }}
               >
-                {!columnConcept && <SelectItem text={t('selectConcept', 'Select a concept')} />}
+                {!columnConcept && <SelectItem text={t('selectConcept', 'Select a concept')} value="" />}
                 {formConcepts.length === 0 ||
-                  (formConceptsError && <SelectItem text={t('noConceptsAvailable', 'No concepts available')} />)}
+                  (formConceptsError && (
+                    <SelectItem text={t('noConceptsAvailable', 'No concepts available')} value="" />
+                  ))}
                 {formConcepts?.length > 0 &&
                   formConcepts.map((concept) => (
                     <SelectItem key={concept.concept} text={concept.label} value={concept.concept}>
@@ -216,21 +218,20 @@ const ConfigureDashboardModal: React.FC<ConfigureDashboardModalProps> = ({
                 name="isDate"
                 orientation="horizontal"
                 legendText={t('isDate', 'Is date')}
-                className={styles.label}
-                defaultSelected={isColumnDate}
-                onChange={(event) => setIsColumnDate(event.toString())}
+                defaultSelected={isColumnDate ? 'true' : 'false'} // Cast boolean to string
+                onChange={(value) => setIsColumnDate(value === 'true')} // Convert string back to boolean
               >
                 <RadioButton
                   className={styles.radioButton}
                   id="isDateTrue"
                   labelText={t('true', 'True')}
-                  value={true}
+                  value="true" // Value as string
                 />
                 <RadioButton
                   className={styles.radioButton}
                   id="isDateFalse"
                   labelText={t('false', 'False')}
-                  value={false}
+                  value="false" // Value as string
                 />
               </RadioButtonGroup>
 
@@ -239,20 +240,20 @@ const ConfigureDashboardModal: React.FC<ConfigureDashboardModalProps> = ({
                 orientation="horizontal"
                 legendText={t('isLink', 'Is link')}
                 className={styles.label}
-                defaultSelected={isColumnLink}
-                onChange={(event) => setIsColumnLink(event.toString())}
+                defaultSelected={isColumnLink ? 'true' : 'false'} // Cast boolean to string
+                onChange={(value) => setIsColumnLink(value === 'true')} // Convert string back to boolean
               >
                 <RadioButton
                   className={styles.radioButton}
                   id="isLinkTrue"
                   labelText={t('true', 'True')}
-                  value={true}
+                  value="true" // Value as string
                 />
                 <RadioButton
                   className={styles.radioButton}
                   id="isLinkFalse"
                   labelText={t('false', 'False')}
-                  value={false}
+                  value="false" // Value as string
                 />
               </RadioButtonGroup>
             </FormGroup>
