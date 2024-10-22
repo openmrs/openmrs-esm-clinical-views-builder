@@ -1,14 +1,8 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import '@testing-library/jest-dom/extend-expect';
-import { I18nextProvider } from 'react-i18next';
-import i18n from 'i18next';
+import '@testing-library/jest-dom';
 import EditTabDefinitionModal from './edit-tab-definition-modal';
 import userEvent from '@testing-library/user-event';
-
-const renderWithI18n = (ui: React.ReactElement) => {
-  return render(<I18nextProvider i18n={i18n}>{ui}</I18nextProvider>);
-};
 
 describe('EditTabDefinitionModal', () => {
   const mockOnSave = jest.fn();
@@ -20,7 +14,7 @@ describe('EditTabDefinitionModal', () => {
   });
 
   it('renders with initial values', () => {
-    const { getByLabelText } = renderWithI18n(
+    const { getByLabelText } = render(
       <EditTabDefinitionModal tabDefinition={tabDefinition} onSave={mockOnSave} onCancel={mockOnCancel} />,
     );
 
@@ -30,7 +24,7 @@ describe('EditTabDefinitionModal', () => {
 
   it('calls onSave with updated values', async () => {
     const user = userEvent.setup();
-    const { getByLabelText, getByText } = renderWithI18n(
+    const { getByLabelText, getByText } = render(
       <EditTabDefinitionModal tabDefinition={tabDefinition} onSave={mockOnSave} onCancel={mockOnCancel} />,
     );
 
@@ -51,7 +45,7 @@ describe('EditTabDefinitionModal', () => {
 
   it('calls onCancel when cancel button is clicked', async () => {
     const user = userEvent.setup();
-    const { getByText } = renderWithI18n(
+    const { getByText } = render(
       <EditTabDefinitionModal tabDefinition={tabDefinition} onSave={mockOnSave} onCancel={mockOnCancel} />,
     );
 

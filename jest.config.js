@@ -1,34 +1,22 @@
-/**
- * @returns {Promise<import('jest').Config>}
- */
-const path = require('path');
-
+/** @type {import('jest').Config} */
 module.exports = {
-  collectCoverageFrom: [
-    '**/src/**/*.component.tsx',
-    '!**/node_modules/**',
-    '!**/vendor/**',
-    '!**/src/**/*.test.*',
-    '!**/src/declarations.d.ts',
-    '!**/e2e/**',
-  ],
+  clearMocks: true,
   transform: {
     '^.+\\.tsx?$': ['@swc/jest'],
   },
   transformIgnorePatterns: ['/node_modules/(?!@openmrs)'],
-moduleNameMapper: {
-  '@openmrs/esm-framework': '@openmrs/esm-framework/mock',
-  '@openmrs/esm-utils': '@openmrs/esm-framework/mock',
-  '\\.(s?css)$': 'identity-obj-proxy',
-  '^lodash-es/(.*)$': 'lodash/$1',
-  'lodash-es': 'lodash',
-  '^dexie$': require.resolve('dexie'),
-  '^@testing-library/jest-dom/extend-expect$': '@testing-library/jest-dom',
-},
-  setupFilesAfterEnv: ['<rootDir>/src/setup-tests.ts'],
-  testPathIgnorePatterns: [path.resolve(__dirname, 'e2e')],
-  testEnvironment: 'jsdom',
-  testEnvironmentOptions: {
-    url: 'http://localhost/',
+  moduleNameMapper: {
+    '^@carbon/icons-react/es/(.*)$': '@carbon/icons-react/lib/$1',
+    '^carbon-components-react/es/(.*)$': 'carbon-components-react/lib/$1',
+    '@openmrs/esm-framework': '@openmrs/esm-framework/mock',
+    '\\.(s?css)$': 'identity-obj-proxy',
+    '^lodash-es/(.*)$': 'lodash/$1',
+    'lodash-es': 'lodash',
+    '^dexie$': '<rootDir>/node_modules/dexie',
+    '^react-i18next$': '<rootDir>/__mocks__/react-i18next.js',
+    'ace-builds': '<rootDir>/node_modules/ace-builds',
   },
+  setupFilesAfterEnv: ['<rootDir>/src/setup-tests.ts'],
+  testEnvironment: 'jsdom',
+  testPathIgnorePatterns: ['<rootDir>/e2e'],
 };
