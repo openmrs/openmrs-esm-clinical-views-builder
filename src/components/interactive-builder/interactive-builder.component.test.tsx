@@ -55,6 +55,34 @@ describe('InteractiveBuilder', () => {
     },
   };
 
+  const mockConfigureTabsSchema: Schema = {
+    id: 'e0fa849d-34b9-4f09-8f53-b669df28efaa',
+    '@openmrs/esm-patient-chart-app': {
+      extensionSlots: {
+        'patient-chart-dashboard-slot': {
+          add: ['nav-group#hIVPackage'],
+          configure: {
+            'nav-group#hIVPackage': {
+              title: 'HIV Package',
+              slotName: 'hiv-package',
+              isExpanded: true,
+            },
+          },
+        },
+        'hiv-package': {
+          add: ['dashboard#hcat-patient-summary'],
+          configure: {
+            'dashboard#hcat-patient-summary': {
+              title: 'Patient Summary',
+              path: 'hcat-patient-summary',
+              slot: 'hcat-patient-summary-dashboard-slot',
+            },
+          },
+        },
+      },
+    },
+  };
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -91,6 +119,57 @@ describe('InteractiveBuilder', () => {
       expect.objectContaining({
         schema: mockSchema,
         onSchemaChange: mockOnSchemaChange,
+      }),
+    );
+  });
+
+  it('enables a user to configure encounter table tabs', async () => {
+    const user = userEvent.setup();
+    render(<InteractiveBuilder schema={mockConfigureTabsSchema} onSchemaChange={mockOnSchemaChange} />);
+
+    expect(screen.getByText(/Continue adding sub menus and configuring dashboards/i)).toBeInTheDocument();
+    expect(screen.getByText(/HIV Package/i)).toBeInTheDocument;
+    expect(screen.getByText(/Clinical View Submenus/i)).toBeInTheDocument;
+    const accordionButton = screen.getByRole('button', { name: /patient summary/i }); // Adjust based on the accordion's button text
+    await user.click(accordionButton);
+    expect(screen.getByText(/Menu Slot : hcat-patient-summary-dashboard-slot/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Now configure dashboards to show on the patient chart when this submenu is clicked/i),
+    ).toBeInTheDocument();
+    const configureDashboardButton = screen.getByRole('button', { name: /configure dashboard/i });
+    expect(configureDashboardButton).toBeInTheDocument();
+
+    await user.click(configureDashboardButton);
+
+    expect(showModal).toHaveBeenCalledWith(
+      'configure-dashboard-modal',
+      expect.objectContaining({
+        closeModal: expect.any(Function),
+        onSchemaChange: expect.any(Function),
+        schema: {
+          '@openmrs/esm-patient-chart-app': {
+            extensionSlots: {
+              'hiv-package': {
+                add: ['dashboard#hcat-patient-summary'],
+                configure: {
+                  'dashboard#hcat-patient-summary': {
+                    path: 'hcat-patient-summary',
+                    slot: 'hcat-patient-summary-dashboard-slot',
+                    title: 'Patient Summary',
+                  },
+                },
+              },
+              'patient-chart-dashboard-slot': {
+                add: ['nav-group#hIVPackage'],
+                configure: {
+                  'nav-group#hIVPackage': { isExpanded: true, slotName: 'hiv-package', title: 'HIV Package' },
+                },
+              },
+            },
+          },
+          id: 'e0fa849d-34b9-4f09-8f53-b669df28efaa',
+        },
+        slotName: 'hcat-patient-summary-dashboard-slot',
       }),
     );
   });

@@ -89,6 +89,8 @@ describe('ConfigureDashboardModal', () => {
       isLowContrast: true,
       subtitle: 'submenuCreated',
     });
+    expect(screen.getByText('tabName')).toBeInTheDocument();
+    expect(screen.getByText('displayTitle')).toBeInTheDocument();
   });
 
   it('shows error snackbar when updateSchema throws an error', async () => {
