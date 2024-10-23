@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import '@testing-library/jest-dom/extend-expect';
+import '@testing-library/jest-dom';
 import { showModal, showSnackbar } from '@openmrs/esm-framework';
 import InteractiveBuilder from './interactive-builder.component';
 import { v4 as uuidv4 } from 'uuid';

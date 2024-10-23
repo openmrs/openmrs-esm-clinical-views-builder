@@ -17,7 +17,7 @@ interface TranslationFnProps {
   t: TFunction;
 }
 
-const ContentPackagesEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
+export const ContentPackagesEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
   const [isMaximized, setIsMaximized] = useState(false);
 
   const [schema, setSchema] = useState<Schema>();
@@ -295,7 +295,7 @@ const ContentPackagesEditorContent: React.FC<TranslationFnProps> = ({ t }) => {
   );
 };
 
-function BackButton({ t }: TranslationFnProps) {
+export function BackButton({ t }: TranslationFnProps) {
   return (
     <div className={styles.backButton}>
       <ConfigurableLink to={window.getOpenmrsSpaBase() + 'clinical-views-builder'}>
@@ -311,7 +311,7 @@ function BackButton({ t }: TranslationFnProps) {
   );
 }
 
-function ClinicalViewsEditor() {
+const ClinicalViewsEditor: React.FC = () => {
   const { t } = useTranslation();
 
   return (
@@ -321,6 +321,6 @@ function ClinicalViewsEditor() {
       <ContentPackagesEditorContent t={t} />
     </>
   );
-}
+};
 
 export default ClinicalViewsEditor;
