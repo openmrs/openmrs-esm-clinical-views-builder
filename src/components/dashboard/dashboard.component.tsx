@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState, useEffect } from 'react';
+import React, { useCallback, useMemo, useState, useEffect, type Dispatch, type SetStateAction } from 'react';
 import { useTranslation, type TFunction } from 'react-i18next';
 import {
   Button,
@@ -22,9 +22,9 @@ import { ContentPackagesBuilderPagination } from '../pagination';
 
 import Header from '../header/header.component';
 import styles from './dashboard.scss';
-import { mockContentPackages } from '../../../__mocks__/content-packages.mock';
 import { navigate, useLayoutType, usePagination, ConfigurableLink, showModal } from '@openmrs/esm-framework';
 import { getAllPackagesFromLocalStorage, deletePackageFromLocalStorage } from '../../utils';
+import { type ContentPackage } from '../../types';
 
 interface ActionButtonsProps {
   responsiveSize: string;
@@ -99,21 +99,21 @@ function ActionButtons({ responsiveSize, clinicalViewKey, t, onDelete, onDownloa
   );
 }
 
-function ContentPackagesList({ isValidating, t }: any) {
+interface ContentPackagesListProps {
+  t: TFunction;
+  clinicalViews: ContentPackage[];
+  setClinicalViews: Dispatch<SetStateAction<any[]>>;
+}
+
+export function ContentPackagesList({ t, clinicalViews, setClinicalViews }: ContentPackagesListProps) {
   const pageSize = 10;
   const isTablet = useLayoutType() === 'tablet';
   const responsiveSize = isTablet ? 'lg' : 'sm';
   const [searchString, setSearchString] = useState('');
-  const [clinicalViews, setClinicalViews] = useState<any[]>([]);
-
-  useEffect(() => {
-    const packages = getAllPackagesFromLocalStorage();
-    setClinicalViews(Object.entries(packages).map(([key, value]) => ({ key, ...(value as object) })));
-  }, []);
 
   const filteredViews = useMemo(() => {
     const searchTerm = searchString.trim().toLowerCase();
-    return clinicalViews.filter((pkg) => pkg.key.toLowerCase().includes(searchTerm));
+    return clinicalViews?.filter((pkg) => Object.keys(pkg)[0]?.toLowerCase().includes(searchTerm));
   }, [clinicalViews, searchString]);
 
   const handleEdit = (packageKey: string) => {
@@ -124,7 +124,7 @@ function ContentPackagesList({ isValidating, t }: any) {
 
   const handleDelete = (packageKey: string) => {
     deletePackageFromLocalStorage(packageKey);
-    setClinicalViews(clinicalViews.filter((pkg) => pkg.key !== packageKey));
+    setClinicalViews(clinicalViews?.filter((pkg) => Object.keys(pkg)[0] !== packageKey));
   };
 
   const tableHeaders = [
@@ -196,6 +196,7 @@ function ContentPackagesList({ isValidating, t }: any) {
   const tableRows = results.map((contentPackage) => {
     const clinicalViewName = getNavGroupTitle(contentPackage);
     const dashboardTitles = getDashboardTitles(contentPackage);
+    const key = Object.keys(contentPackage)[0];
 
     return {
       id: contentPackage.key,
@@ -203,7 +204,7 @@ function ContentPackagesList({ isValidating, t }: any) {
         <ConfigurableLink
           className={styles.link}
           to={`${window.spaBase}/clinical-views-builder/edit/${contentPackage.id}`}
-          templateParams={{ clinicalViewUuid: contentPackage.id }}
+          templateParams={{ clinicalViewUuid: key }}
         >
           {clinicalViewName}
         </ConfigurableLink>
@@ -212,11 +213,11 @@ function ContentPackagesList({ isValidating, t }: any) {
       actions: (
         <ActionButtons
           responsiveSize={responsiveSize}
-          clinicalViewKey={contentPackage.key}
+          clinicalViewKey={key}
           t={t}
-          onEdit={() => handleEdit(contentPackage.key)}
-          onDelete={() => handleDelete(contentPackage.key)}
-          onDownload={() => handleDownload(contentPackage.key)}
+          onEdit={() => handleEdit(key)}
+          onDelete={() => handleDelete(key)}
+          onDownload={() => handleDownload(key)}
         />
       ),
     };
@@ -232,11 +233,6 @@ function ContentPackagesList({ isValidating, t }: any) {
 
   return (
     <>
-      <div className={styles.flexContainer}>
-        <div className={styles.backgroundDataFetchingIndicator}>
-          <span>{isValidating ? <InlineLoading /> : null}</span>
-        </div>
-      </div>
       <div className={styles.tableHeading}>{t('clinicalViewsTableHeader', 'Clinical Views List')}</div>
       <DataTable rows={tableRows} headers={tableHeaders} size={isTablet ? 'lg' : 'sm'} useZebraStyles>
         {({ rows, headers, getTableProps, getHeaderProps, getRowProps }) => (
@@ -318,15 +314,19 @@ function ContentPackagesList({ isValidating, t }: any) {
 
 const Dashboard: React.FC = () => {
   const { t } = useTranslation();
+  const [clinicalViews, setClinicalViews] = useState<any[]>([]);
+
+  useEffect(() => {
+    const packages = getAllPackagesFromLocalStorage();
+    setClinicalViews(Object.entries(packages).map(([key, value]) => ({ key, ...(value as object) })));
+  }, []);
 
   return (
     <main>
       <Header title={t('home', 'Home')} />
       <div className={styles.container}>
         {(() => {
-          return (
-            <ContentPackagesList contentPackages={mockContentPackages} isValidating={false} mutate={() => {}} t={t} />
-          );
+          return <ContentPackagesList t={t} clinicalViews={clinicalViews} setClinicalViews={setClinicalViews} />;
         })()}
       </div>
     </main>
