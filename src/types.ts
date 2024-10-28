@@ -13,14 +13,16 @@ export interface SlotConfiguration {
   configure?: {
     [key: string]:
       | {
-          title: string;
+          title?: string;
           slotName?: string;
           isExpanded?: boolean;
+          path?: string;
           tabDefinitions?: TabDefinition[];
+          'Translation overrides'?: TranslationOverrides;
         }
       | DashboardConfig;
   };
-  'Translation overrides': TranslationOverrides;
+  'Translation overrides'?: TranslationOverrides;
 }
 
 interface ExtensionSlots {
@@ -43,7 +45,7 @@ export interface ActionOption {
 export interface Column {
   id: string;
   title: string;
-  concept: string;
+  concept?: string;
   isDate?: boolean;
   isLink?: boolean;
   type?: string;
@@ -54,8 +56,9 @@ export interface Column {
 }
 
 export interface TabDefinition {
-  id: any;
+  id?: any;
   tabName: string;
+  title?: string;
   headerTitle: string;
   displayText: string;
   encounterType: string;
@@ -82,6 +85,7 @@ export interface ExtensionSlot {
       isExpanded?: boolean;
       tabDefinitions?: TabDefinition[];
       tilesDefinitions?: TilesDefinition[];
+      'Translation overrides'?: TranslationOverrides;
     };
   };
 }

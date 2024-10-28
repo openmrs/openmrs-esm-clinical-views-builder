@@ -1,4 +1,6 @@
-export const mockContentPackages = [
+import { type ContentPackage } from '../src/types';
+
+export const mockContentPackages: ContentPackage[] = [
   {
     '@openmrs/esm-patient-chart-app': {
       extensionSlots: {
@@ -9,14 +11,6 @@ export const mockContentPackages = [
               title: 'hIVCareAndTreatment',
               slotName: 'hiv-care-and-treatment-group-slot',
               isExpanded: true,
-            },
-            'Translation overrides': {
-              en: {
-                hIVCareAndTreatment: 'HIV Care And Treatment',
-              },
-              fr: {
-                hIVCareAndTreatment: 'Soins et traitement du VIH',
-              },
             },
           },
         },
@@ -133,32 +127,6 @@ export const mockContentPackages = [
                   ],
                 },
               ],
-            },
-            'Translation overrides': {
-              en: {
-                clinicalVisit: 'Clinical Visit',
-                clinicalVisitEncounters: 'clinical visit encounters',
-                visitDate: 'Visit Date',
-                visitType: 'Visit Type',
-                tbScreeningOutcome: 'TB Screening Outcome',
-                nextAppointmentDate: 'Next Appointment Date',
-                actionsTitle: 'Actions',
-                viewDetails: 'View Details',
-                editForm: 'Edit Form',
-                add: 'Add',
-              },
-              fr: {
-                clinicalVisit: 'Visite clinique',
-                clinicalVisitEncounters: 'Rencontres de visite clinique',
-                visitDate: 'Date de visite',
-                visitType: 'Type de visite',
-                tbScreeningOutcome: 'Résultat du dépistage de la tuberculose',
-                nextAppointmentDate: 'Date du prochain rendez-vous',
-                actionsTitle: 'Actions',
-                viewDetails: 'Voir les détails',
-                editForm: 'Modifier le formulaire',
-                add: 'Ajouter',
-              },
             },
           },
         },
@@ -281,36 +249,6 @@ export const mockContentPackages = [
                   ],
                 },
               ],
-            },
-            'Translation overrides': {
-              en: {
-                partnerNotification: 'Partner Notification',
-                contactTracing: 'Contact Tracing',
-                contactDateTitle: 'Contact Date',
-                nameTitle: 'Name',
-                relationshipTitle: 'Relationship',
-                status: 'Status',
-                contactMethodTitle: 'Contact Method',
-                contactOutcomeTitle: 'Contact Outcome',
-                actionsTitle: 'Actions',
-                viewDetails: 'View Details',
-                editForm: 'Edit Form',
-                add: 'Add',
-              },
-              fr: {
-                partnerNotification: 'Notification des partenaires',
-                contactTracing: 'Recherche des contacts',
-                contactDateTitle: 'Date de contact',
-                nameTitle: 'Nom',
-                relationshipTitle: 'Relation',
-                status: 'Statut',
-                contactMethodTitle: 'Méthode de contact',
-                contactOutcomeTitle: 'Résultat du contact',
-                actionsTitle: 'Actions',
-                viewDetails: 'Voir les détails',
-                editForm: 'Modifier le formulaire',
-                add: 'Ajouter',
-              },
             },
           },
         },

@@ -11,7 +11,7 @@ export const getAllPackagesFromLocalStorage = () => {
   const packages: any = {};
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
-    if (key && key.startsWith('packageJSON_')) {
+    if (key && key.startsWith('@openmrs/esm-patient-chart-app')) {
       // Ensure to only get relevant packages
       packages[key] = JSON.parse(localStorage.getItem(key)!);
     }
