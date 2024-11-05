@@ -172,4 +172,58 @@ describe('DeleteConfigDetailModal', () => {
     });
     expect(mockCloseModal).toHaveBeenCalled();
   });
+
+  it('successfully completes the deletion process with proper success indicators', async () => {
+    const user = userEvent.setup();
+    render(<DeleteConfigDetailModal {...mockProps} />);
+    expect(screen.getByText('deleteConfigDetailsConfirmationText')).toBeInTheDocument();
+    
+    await user.click(screen.getByText('deleteConfiguration'));
+    
+    expect(mockOnSchemaChange).toHaveBeenCalledTimes(1);
+    expect(showSnackbar).toHaveBeenCalledWith({
+      title: 'success',
+      kind: 'success',
+      isLowContrast: true,
+      subtitle: 'tabConfigurationDeleted'
+    });
+    expect(mockCloseModal).toHaveBeenCalled();
+    expect(mockOnSchemaChange).toHaveBeenCalledWith({
+      '@openmrs/esm-patient-chart-app': {
+        extensionSlots: {
+          'patient-chart-dashboard-slot': {
+            configure: {
+              configKey1: {
+                title: 'Sample Title',
+                slotName: 'sample-slot',
+                isExpanded: true,
+                tabDefinitions: [
+                  {
+                    id: 'tab1',
+                    tabName: 'tab1',
+                    headerTitle: 'Header 1',
+                    displayText: 'Tab 1',
+                    encounterType: 'encounter1',
+                    columns: [],
+                    launchOptions: { displayText: 'Launch' },
+                    formList: [],
+                  },
+                ],
+              },
+            },
+          },
+          slot1: {
+            configure: {
+              configKey1: {
+                'encounter-list-table-tabs': undefined,
+                slotName: 'slot1',
+                title: 'Another Title',
+                widgetType1: [{ tabName: 'tab1' }],
+              },
+            },
+          },
+        },
+      },
+    });
+  });
 });
