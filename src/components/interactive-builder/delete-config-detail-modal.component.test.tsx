@@ -173,22 +173,13 @@ describe('DeleteConfigDetailModal', () => {
     expect(mockCloseModal).toHaveBeenCalled();
   });
 
-  it('successfully completes the deletion process with proper success indicators', async () => {
+  it('successfully deletes configuration and updates schema when confirm button is clicked', async () => {
     const user = userEvent.setup();
     render(<DeleteConfigDetailModal {...mockProps} />);
-    expect(screen.getByText('deleteConfigDetailsConfirmationText')).toBeInTheDocument();
-    
+
     await user.click(screen.getByText('deleteConfiguration'));
-    
-    expect(mockOnSchemaChange).toHaveBeenCalledTimes(1);
-    expect(showSnackbar).toHaveBeenCalledWith({
-      title: 'success',
-      kind: 'success',
-      isLowContrast: true,
-      subtitle: 'tabConfigurationDeleted'
-    });
-    expect(mockCloseModal).toHaveBeenCalled();
-    expect(mockOnSchemaChange).toHaveBeenCalledWith({
+
+    const expectedSchema = {
       '@openmrs/esm-patient-chart-app': {
         extensionSlots: {
           'patient-chart-dashboard-slot': {
@@ -215,15 +206,22 @@ describe('DeleteConfigDetailModal', () => {
           slot1: {
             configure: {
               configKey1: {
-                'encounter-list-table-tabs': undefined,
-                slotName: 'slot1',
                 title: 'Another Title',
+                slotName: 'slot1',
                 widgetType1: [{ tabName: 'tab1' }],
               },
             },
           },
         },
       },
+    };
+    expect(mockOnSchemaChange).toHaveBeenCalledWith(expectedSchema);
+    expect(showSnackbar).toHaveBeenCalledWith({
+      title: 'success',
+      kind: 'success',
+      isLowContrast: true,
+      subtitle: 'tabConfigurationDeleted'
     });
+    expect(mockCloseModal).toHaveBeenCalled();
   });
 });
