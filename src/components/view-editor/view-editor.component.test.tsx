@@ -36,18 +36,18 @@ describe('ContentPackagesEditorContent', () => {
     if (clinicalViewId) {
       localStorage.setItem(clinicalViewId, JSON.stringify(defaultExistingContent));
     }
-    
+
     return render(
       <MemoryRouter initialEntries={[path]}>
         <ContentPackagesEditorContent t={(key) => key} />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
   };
 
   const verifyBasicElements = async () => {
     expect(screen.getByText('schemaEditor')).toBeInTheDocument();
     expect(screen.getByText(/interactiveBuilderHelperText/i)).toBeInTheDocument();
-    
+
     const startBuildingButton = screen.getByRole('button', { name: /startBuilding/i });
     expect(startBuildingButton).toBeInTheDocument();
     await userEvent.click(startBuildingButton);
@@ -68,18 +68,18 @@ describe('ContentPackagesEditorContent', () => {
     expect(screen.getByText('schemaEditor')).toBeInTheDocument();
     const importSchemaButtons = screen.queryAllByText(/importSchema/i);
     expect(importSchemaButtons.length).toBeGreaterThan(0);
-    
+
     await userEvent.click(screen.getByText(/inputDummySchema/i));
 
-    ['Package One', 'First Menu', 'Second Menu'].forEach(text => 
-      expect(screen.getByText(new RegExp(text, 'i'))).toBeInTheDocument()
+    ['Package One', 'First Menu', 'Second Menu'].forEach((text) =>
+      expect(screen.getByText(new RegExp(text, 'i'))).toBeInTheDocument(),
     );
 
     await userEvent.click(screen.getByRole('button', { name: /First Menu/i }));
     expect(screen.getByText(/menuSlot\s*:\s*first-menu-slot/i)).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: /Second Menu/i }));
     expect(screen.getByText(/menuSlot\s*:\s*second-menu-slot/i)).toBeInTheDocument();
-    
+
     expect(screen.getByRole('button', { name: /addClinicalViewSubMenu/i })).toBeInTheDocument();
   });
 
@@ -93,6 +93,13 @@ describe('ContentPackagesEditorContent', () => {
     const clinicalViewId = 'existing-clinical-view-id';
     renderComponent(`/clinical-views-builder/edit/${clinicalViewId}`, clinicalViewId);
     await verifyBasicElements();
+
+    const editTabDefinitionButton = screen.getByRole('button', { name: /renderChanges/i });
+    expect(editTabDefinitionButton).toBeInTheDocument();
+    await userEvent.click(editTabDefinitionButton);
+    const formInput = screen.getByRole('textbox');
+    expect(formInput).toBeInTheDocument();
+    await userEvent.type(formInput, 'New Form Input Value');
   });
 
   it('should handle errors during schema operations', async () => {
@@ -113,11 +120,22 @@ describe('ContentPackagesEditorContent', () => {
     const editTabDefinitionButton = screen.getByRole('button', { name: /renderChanges/i });
     expect(editTabDefinitionButton).toBeInTheDocument();
     await userEvent.click(editTabDefinitionButton);
+    const formInput = screen.getByRole('textbox');
+    expect(formInput).toBeInTheDocument();
+    await userEvent.type(formInput, 'New Form Input Value');
   });
 
   it('should properly update state when schema changes', async () => {
     const clinicalViewId = 'existing-clinical-view-id';
     renderComponent(`/clinical-views-builder/edit/${clinicalViewId}`, clinicalViewId);
     await verifyBasicElements();
+
+    const schemaInput = screen.getByRole('textbox');
+    expect(schemaInput).toBeInTheDocument();
+    await userEvent.type(schemaInput, 'Updated Schema');
+    const saveButton = screen.getByRole('button', { name: /saveClinicalView/i });
+    await userEvent.click(saveButton);
+    const updatedSchemaInput = screen.getByRole('textbox');
+    expect(updatedSchemaInput).toBeInTheDocument();
   });
 });
