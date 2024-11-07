@@ -47,18 +47,15 @@ const DeleteConfigDetailModal: React.FC<DeleteConfigDetailModalProps> = ({
                 ...schemaBasePath.extensionSlots[slotDetails?.slot]?.configure,
                 [configurationKey]: {
                   ...schemaBasePath.extensionSlots[slotDetails?.slot]?.configure[configurationKey],
-                  [widgetType]: schemaBasePath.extensionSlots[slotDetails?.slot]?.configure[configurationKey]?.[
-                    widgetType
-                  ]?.filter((def) => {
-                    const retainedConfigs = def.tabName !== tabDefinition.tabName;
-                    return retainedConfigs;
-                  }),
                 },
               },
             } as ExtensionSlot,
           },
         },
       };
+
+      delete updatedSchema['@openmrs/esm-patient-chart-app'].extensionSlots[slotDetails?.slot]
+        .configure[configurationKey][widgetType];
 
       onSchemaChange(updatedSchema);
       showSnackbar({

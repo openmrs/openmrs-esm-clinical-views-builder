@@ -4,6 +4,7 @@ import '@testing-library/jest-dom';
 import DeleteConfigDetailModal from './delete-config-detail-modal.component';
 import { WidgetTypes } from '../../types';
 import userEvent from '@testing-library/user-event';
+import { showSnackbar } from '@openmrs/esm-framework';
 
 jest.mock('@openmrs/esm-framework', () => ({
   showSnackbar: jest.fn(),
@@ -91,6 +92,136 @@ describe('DeleteConfigDetailModal', () => {
     render(<DeleteConfigDetailModal {...mockProps} />);
 
     await user.click(screen.getByText('cancel'));
+    expect(mockCloseModal).toHaveBeenCalled();
+  });
+
+  it('successfully deletes configuration and updates schema when confirm button is clicked', async () => {
+    const user = userEvent.setup();
+    render(<DeleteConfigDetailModal {...mockProps} />);
+  
+    await user.click(screen.getByText('deleteConfiguration'));
+    expect(mockOnSchemaChange).toHaveBeenCalledTimes(1);
+    expect(mockOnSchemaChange).toHaveBeenCalledWith({
+      '@openmrs/esm-patient-chart-app': {
+        extensionSlots: {
+          'patient-chart-dashboard-slot': {
+            configure: {
+              configKey1: {
+                title: 'Sample Title',
+                slotName: 'sample-slot',
+                isExpanded: true,
+                tabDefinitions: [
+                  {
+                    id: 'tab1',
+                    tabName: 'tab1',
+                    headerTitle: 'Header 1',
+                    displayText: 'Tab 1',
+                    encounterType: 'encounter1',
+                    columns: [],
+                    launchOptions: { displayText: 'Launch' },
+                    formList: [],
+                  },
+                ],
+              },
+            },
+          },
+          slot1: {
+            configure: {
+              configKey1: {
+                'encounter-list-table-tabs': undefined,
+                slotName: 'slot1',
+                title: 'Another Title',
+                widgetType1: [
+                  {
+                    tabName: 'tab1',
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
+    });
+  });
+
+  it('displays correct configuration details before deletion', () => {
+    render(<DeleteConfigDetailModal {...mockProps} />);
+  
+    expect(screen.getByText('menuSlot : slot1')).toBeInTheDocument();
+    expect(screen.getByText('tabName : tab1')).toBeInTheDocument();
+    expect(screen.getByText('headerTitle : Header 1')).toBeInTheDocument();
+    expect(screen.getByText('deleteConfiguration')).toBeEnabled();
+  });
+
+  it('shows error snackbar when deletion fails', async () => {
+    const user = userEvent.setup();
+    const errorProps = {
+      ...mockProps,
+      onSchemaChange: jest.fn().mockImplementation(() => {
+        throw new Error('Failed to delete configuration');
+      }),
+    };
+  
+    render(<DeleteConfigDetailModal {...errorProps} />);
+  
+    await user.click(screen.getByText('deleteConfiguration'));
+    expect(showSnackbar).toHaveBeenCalledWith({
+      title: 'errorDeletingConfiguration',
+      kind: 'error',
+      subtitle: 'Failed to delete configuration',
+    });
+    expect(mockCloseModal).toHaveBeenCalled();
+  });
+
+  it('successfully deletes configuration and updates schema when confirm button is clicked', async () => {
+    const user = userEvent.setup();
+    render(<DeleteConfigDetailModal {...mockProps} />);
+
+    await user.click(screen.getByText('deleteConfiguration'));
+
+    const expectedSchema = {
+      '@openmrs/esm-patient-chart-app': {
+        extensionSlots: {
+          'patient-chart-dashboard-slot': {
+            configure: {
+              configKey1: {
+                title: 'Sample Title',
+                slotName: 'sample-slot',
+                isExpanded: true,
+                tabDefinitions: [
+                  {
+                    id: 'tab1',
+                    tabName: 'tab1',
+                    headerTitle: 'Header 1',
+                    displayText: 'Tab 1',
+                    encounterType: 'encounter1',
+                    columns: [],
+                    launchOptions: { displayText: 'Launch' },
+                    formList: [],
+                  },
+                ],
+              },
+            },
+          },
+          slot1: {
+            configure: {
+              configKey1: {
+                title: 'Another Title',
+                slotName: 'slot1',
+                widgetType1: [{ tabName: 'tab1' }],
+              },
+            },
+          },
+        },
+      },
+    };
+    expect(mockOnSchemaChange).toHaveBeenCalledWith(expectedSchema);
+    expect(showSnackbar).toHaveBeenCalledWith({
+      title: 'success',
+      kind: 'success',
+      isLowContrast: true,
+      subtitle: 'tabConfigurationDeleted'
+    });
     expect(mockCloseModal).toHaveBeenCalled();
   });
 });
