@@ -1,9 +1,9 @@
-import { Page } from '@playwright/test';
+import { type Page } from '@playwright/test';
 
 export class HomePage {
   constructor(readonly page: Page) {}
 
-  async goto() {
-    await this.page.goto(`home`);
+  async gotoHome() {
+    await this.page.goto('/openmrs/spa/clinical-views-builder');
   }
 }
