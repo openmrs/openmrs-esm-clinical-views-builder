@@ -35,7 +35,14 @@ interface ActionButtonsProps {
   onDownload: (key: string) => void;
 }
 
-function ActionButtons({ responsiveSize, clinicalViewKey, t, onDelete, onDownload, onEdit }: ActionButtonsProps) {
+export function ActionButtons({
+  responsiveSize,
+  clinicalViewKey,
+  t,
+  onDelete,
+  onDownload,
+  onEdit,
+}: ActionButtonsProps) {
   const defaultEnterDelayInMs = 300;
 
   const launchDeleteClinicalViewsPackageModal = () => {
@@ -145,16 +152,34 @@ export function ContentPackagesList({ t, clinicalViews, setClinicalViews }: Cont
   const { paginated, goTo, results, currentPage } = usePagination(filteredViews, pageSize);
 
   const handleDownload = (key) => {
-    const schema = localStorage.getItem(`packageJSON_${key}`);
-    if (schema) {
-      const blob = new Blob([schema], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${key}.json`;
-      a.click();
-    } else {
-      console.error('No schema found to download.');
+    let url;
+    let anchor;
+    try {
+      const schema = localStorage.getItem(key);
+      if (!schema) {
+        console.error('No schema found to download.');
+        return;
+      }
+
+      const blob = new Blob([schema], {
+        type: 'application/json;charset=utf-8',
+      });
+      url = URL.createObjectURL(blob);
+
+      anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = `${key}.json`;
+      document.body.appendChild(anchor);
+      anchor.click();
+    } catch (error) {
+      console.error('Error downloading schema:', error);
+    } finally {
+      if (url) {
+        URL.revokeObjectURL(url);
+      }
+      if (anchor && anchor.parentNode) {
+        anchor.parentNode.removeChild(anchor);
+      }
     }
   };
 
@@ -196,7 +221,8 @@ export function ContentPackagesList({ t, clinicalViews, setClinicalViews }: Cont
   const tableRows = results.map((contentPackage) => {
     const clinicalViewName = getNavGroupTitle(contentPackage);
     const dashboardTitles = getDashboardTitles(contentPackage);
-    const key = Object.keys(contentPackage)[0];
+
+    const key = Object.keys(contentPackage)[1];
 
     return {
       id: contentPackage.key,
@@ -272,8 +298,8 @@ export function ContentPackagesList({ t, clinicalViews, setClinicalViews }: Cont
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {rows.map((row) => (
-                    <TableRow key="row.id" {...getRowProps({ row })} data-testid={`content-package-row-${row.id}`}>
+                  {rows.map((row, key) => (
+                    <TableRow key={key} {...getRowProps({ row })} data-testid={`content-package-row-${row.id}`}>
                       {row.cells.map((cell) => (
                         <TableCell key={cell.id}>{cell.value}</TableCell>
                       ))}
